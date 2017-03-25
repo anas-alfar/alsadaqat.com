@@ -58,6 +58,7 @@
 # - Add asset_type_condition many to many table
 # - Handle asset transfer within the same organization between different branches
 # - Add many to many table to connect donors wiht projects
+# - Add slip number on assets_received or asset_liabilities
 # 
 # 
 # === TODO ===
@@ -97,7 +98,6 @@
 # - Add organization_group_XXX for each orgsnization where XXX = organization_id as many-to-many table
 # - Handle organization subscription payment?
 # - Add "Description == البيان == نايبلا" for donations
-# - Add slip number on assets_received or asset_liabilities
 # - Change project? cause? program?
 # - Change beneficiary status
 #   - Under study
@@ -131,6 +131,7 @@
 # - How can the organization donate to other organizaitons, projects, or cause???
 # 
 # == Cron Jobs ==
+# - Send reminders for donors based on their sponsorship
 # - Accounting statment, auto release money for organizations
 # - Renewal organization subscription
 # - Assets to be expired
@@ -191,7 +192,7 @@
 # == Database Changes ==
 # - Add social media integration to signup as donor
 #   - Google, FB, 
-# - Add social media profiles for org, donor, benefiacry, and agents
+# - Add social media profiles for org, donor, beneficiary, and agents
 # - Add social media integration for communication
 #   - WhatsApp, Twitter, FB, SnapChat, Instagram, Google [YouTube Channel]
 # - Add communication channel
@@ -364,7 +365,7 @@ DROP TABLE IF EXISTS `marital_status`;
 
 CREATE TABLE `marital_status` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `published` enum('Yes', 'No') COLLATE utf8_bin NOT NULL DEFAULT 'Yes' COMMENT 'Required, DropDownList',
+  `published` enum('Yes', 'No') COLLATE utf8_bin NOT NULL DEFAULT 'Yes',
   `country_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_user_id` int(11) unsigned NOT NULL,
@@ -381,7 +382,7 @@ DROP TABLE IF EXISTS `marital_status_locale`;
 
 CREATE TABLE `marital_status_locale` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) DEFAULT NULL COMMENT 'Required, Text Field, Min:3, Max:100',
+  `name` varchar(255) DEFAULT NULL,
   `description` mediumtext NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:0, Max: 2048',
   `locale_id` int(11) unsigned NOT NULL,
   `marital_status_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
@@ -409,7 +410,7 @@ DROP TABLE IF EXISTS `education_level`;
 
 CREATE TABLE `education_level` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `published` enum('Yes', 'No') COLLATE utf8_bin NOT NULL DEFAULT 'Yes' COMMENT 'Required, DropDownList',
+  `published` enum('Yes', 'No') COLLATE utf8_bin NOT NULL DEFAULT 'Yes',
   `country_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_user_id` int(11) unsigned NOT NULL,
@@ -426,7 +427,7 @@ DROP TABLE IF EXISTS `education_level_locale`;
 
 CREATE TABLE `education_level_locale` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) DEFAULT NULL COMMENT 'Required, Text Field, Min:3, Max:100',
+  `name` varchar(255) DEFAULT NULL,
   `description` mediumtext NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:0, Max: 2048',
   `locale_id` int(11) unsigned NOT NULL,
   `education_level_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
@@ -450,7 +451,7 @@ DROP TABLE IF EXISTS `medical_condition`;
 
 CREATE TABLE `medical_condition` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `published` enum('Yes', 'No') COLLATE utf8_bin NOT NULL DEFAULT 'Yes' COMMENT 'Required, DropDownList',
+  `published` enum('Yes', 'No') COLLATE utf8_bin NOT NULL DEFAULT 'Yes',
   `country_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_user_id` int(11) unsigned NOT NULL,
@@ -467,7 +468,7 @@ DROP TABLE IF EXISTS `medical_condition_locale`;
 
 CREATE TABLE `medical_condition_locale` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) DEFAULT NULL COMMENT 'Required, Text Field, Min:3, Max:100',
+  `name` varchar(255) DEFAULT NULL,
   `description` mediumtext NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:0, Max: 2048',
   `locale_id` int(11) unsigned NOT NULL,
   `medical_condition_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
@@ -490,7 +491,7 @@ DROP TABLE IF EXISTS `death_reason`;
 
 CREATE TABLE `death_reason` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `published` enum('Yes', 'No') COLLATE utf8_bin NOT NULL DEFAULT 'Yes' COMMENT 'Required, DropDownList',
+  `published` enum('Yes', 'No') COLLATE utf8_bin NOT NULL DEFAULT 'Yes',
   `country_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_user_id` int(11) unsigned NOT NULL,
@@ -507,7 +508,7 @@ DROP TABLE IF EXISTS `death_reason_locale`;
 
 CREATE TABLE `death_reason_locale` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) DEFAULT NULL COMMENT 'Required, Text Field, Min:3, Max:100',
+  `name` varchar(255) DEFAULT NULL,
   `description` mediumtext NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:0, Max: 2048',
   `locale_id` int(11) unsigned NOT NULL,
   `death_reason_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
@@ -529,7 +530,7 @@ DROP TABLE IF EXISTS `media_filetype`;
 
 CREATE TABLE `media_filetype` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `published` enum('Yes', 'No') COLLATE utf8_bin NOT NULL DEFAULT 'Yes' COMMENT 'Required, DropDownList',
+  `published` enum('Yes', 'No') COLLATE utf8_bin NOT NULL DEFAULT 'Yes',
   `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_user_id` int(11) unsigned NOT NULL,
   `date_added` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
@@ -545,7 +546,7 @@ DROP TABLE IF EXISTS `media_filetype_locale`;
 
 CREATE TABLE `media_filetype_locale` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) DEFAULT NULL COMMENT 'Required, Text Field, Min:3, Max:100',
+  `name` varchar(255) DEFAULT NULL,
   `description` mediumtext NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:0, Max: 2048',
   `locale_id` int(11) unsigned NOT NULL,
   `media_filetype_id` int(11) unsigned NOT NULL,
@@ -584,7 +585,7 @@ DROP TABLE IF EXISTS `media_status_locale`;
 
 CREATE TABLE `media_status_locale` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) DEFAULT NULL COMMENT 'Required, Text Field, Min:3, Max:100',
+  `name` varchar(255) DEFAULT NULL,
   `description` mediumtext NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:0, Max: 2048',
   `locale_id` int(11) unsigned NOT NULL,
   `media_status_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
@@ -619,7 +620,7 @@ DROP TABLE IF EXISTS `media_category`;
 
 CREATE TABLE `media_category` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) DEFAULT NULL COMMENT 'Required, Text Field, Min:3, Max:100',
+  `name` varchar(255) DEFAULT NULL,
   `published` enum('Yes', 'No') NOT NULL DEFAULT 'No',
   `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_user_id` int(11) unsigned NOT NULL,
@@ -677,10 +678,95 @@ DROP TABLE IF EXISTS `media_type_locale`;
 
 CREATE TABLE `media_type_locale` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) DEFAULT NULL COMMENT 'Required, Text Field, Min:3, Max:100',
+  `name` varchar(255) DEFAULT NULL,
   `description` mediumtext NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:0, Max: 2048',
   `locale_id` int(11) unsigned NOT NULL,
   `media_type_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
+  `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
+  `owner_organization_user_id` int(11) unsigned NOT NULL,
+  `date_added` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
+  `date_updated` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+# Dump of table message_type
+# - SMS
+# - Mail
+# - Web Notification
+# - Push
+# - MMS
+# - Viber
+# - WhatsApp
+# ------------------------------------------------------------
+
+DROP TABLE IF EXISTS `message_type`;
+
+CREATE TABLE `message_type` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `published` enum('Yes', 'No') NOT NULL DEFAULT 'No',
+  `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
+  `owner_organization_user_id` int(11) unsigned NOT NULL,
+  `date_added` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
+  `date_updated` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+# Dump of table message_type_locale
+# ------------------------------------------------------------
+
+DROP TABLE IF EXISTS `message_type_locale`;
+
+CREATE TABLE `message_type_locale` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) DEFAULT NULL,
+  `description` mediumtext NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:0, Max: 2048',
+  `locale_id` int(11) unsigned NOT NULL,
+  `message_type_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
+  `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
+  `owner_organization_user_id` int(11) unsigned NOT NULL,
+  `date_added` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
+  `date_updated` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+# Dump of table message_template
+# ------------------------------------------------------------
+
+DROP TABLE IF EXISTS `message_template`;
+
+CREATE TABLE `message_template` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `message_type_id` int(11) unsigned NOT NULL,
+  `from_mobile_number` varchar(255) NOT NULL DEFAULT '',
+  `from_email` varchar(255) NOT NULL DEFAULT '',
+  `to_mobile_number` varchar(255) NOT NULL DEFAULT '',
+  `to_email` varchar(255) NOT NULL DEFAULT '',
+  `published` enum('Yes', 'No') NOT NULL DEFAULT 'No',
+  `organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
+  `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
+  `owner_organization_user_id` int(11) unsigned NOT NULL,
+  `date_added` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
+  `date_updated` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+# Dump of table message_template_locale
+# ------------------------------------------------------------
+
+DROP TABLE IF EXISTS `message_template_locale`;
+
+CREATE TABLE `message_template_locale` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `from_name` varchar(255) NOT NULL DEFAULT '',
+  `to_name` varchar(255) NOT NULL DEFAULT '',
+  `subject` varchar(255) NOT NULL DEFAULT '',
+  `description` mediumtext NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:0, Max: 2048',
+  `locale_id` int(11) unsigned NOT NULL,
+  `message_template_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_user_id` int(11) unsigned NOT NULL,
   `date_added` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
@@ -696,11 +782,11 @@ DROP TABLE IF EXISTS `city`;
 
 CREATE TABLE `city` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `country_id` int(11) unsigned NOT NULL COMMENT 'Required, DropDownList',
+  `country_id` int(11) unsigned NOT NULL,
   `population_count` int(11) unsigned DEFAULT NULL COMMENT 'Optional: Text Field, Min:1',
   `houses_count` int(11) unsigned DEFAULT NULL COMMENT 'Optional: Text Field, Min:1',
   `distance_to_capital` int(11) unsigned DEFAULT NULL COMMENT 'Optional: Text Field, Min:1',
-  `published` enum('Yes', 'No') COLLATE utf8_bin NOT NULL DEFAULT 'Yes' COMMENT 'Required, DropDownList',
+  `published` enum('Yes', 'No') COLLATE utf8_bin NOT NULL DEFAULT 'Yes',
   `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_user_id` int(11) unsigned NOT NULL,
   `date_added` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
@@ -737,9 +823,9 @@ DROP TABLE IF EXISTS `country`;
 CREATE TABLE `country` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `iso_code_2` varchar(2) COLLATE utf8_bin NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:2, Max:2',
-  `iso_code_3` varchar(3) COLLATE utf8_bin NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min:3, Max:3',
+  `iso_code_3` varchar(3) COLLATE utf8_bin NOT NULL DEFAULT '',
   `default_currency` varchar(3) COLLATE utf8_bin NOT NULL DEFAULT 'USD',
-  `published` enum('Yes', 'No') COLLATE utf8_bin NOT NULL DEFAULT 'Yes' COMMENT 'Required, DropDownList',
+  `published` enum('Yes', 'No') COLLATE utf8_bin NOT NULL DEFAULT 'Yes',
   `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_user_id` int(11) unsigned NOT NULL,
   `date_added` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
@@ -864,10 +950,10 @@ CREATE TABLE `asset` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `asset_type_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `cost` float unsigned NOT NULL COMMENT 'Optional, Text Field, Min:0.1',
-  `tax_type` enum('Fixed', 'Percent', 'None') NOT NULL DEFAULT 'None' COMMENT 'Required, DropDownList',
+  `tax_type` enum('Fixed', 'Percent', 'None') NOT NULL DEFAULT 'None',
   `tax_value` float unsigned NOT NULL COMMENT 'Optional, Text Field, Min:0.1',
   `currency` varchar(3) COLLATE utf8_bin NOT NULL DEFAULT 'USD',
-  `currency_exchange_rate_id` int(11) unsigned NOT NULL COMMENT 'Required, DropDownList',
+  `currency_exchange_rate_id` int(11) unsigned NOT NULL,
   `published` enum('Yes', 'No') NOT NULL DEFAULT 'No',
   `country_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
@@ -939,7 +1025,7 @@ DROP TABLE IF EXISTS `asset_type_locale`;
 
 CREATE TABLE `asset_type_locale` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) DEFAULT NULL COMMENT 'Required, Text Field, Min:3, Max:100',
+  `name` varchar(255) DEFAULT NULL,
   `description` mediumtext NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:0, Max: 2048',
   `locale_id` int(11) unsigned NOT NULL,
   `asset_type_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
@@ -986,7 +1072,7 @@ DROP TABLE IF EXISTS `asset_storage_type_locale`;
 
 CREATE TABLE `asset_storage_type_locale` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) DEFAULT NULL COMMENT 'Required, Text Field, Min:3, Max:100',
+  `name` varchar(255) DEFAULT NULL,
   `description` mediumtext NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:0, Max: 2048',
   `locale_id` int(11) unsigned NOT NULL,
   `asset_storage_type_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
@@ -1047,7 +1133,7 @@ DROP TABLE IF EXISTS `asset_unit_type_locale`;
 
 CREATE TABLE `asset_unit_type_locale` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) DEFAULT NULL COMMENT 'Required, Text Field, Min:3, Max:100',
+  `name` varchar(255) DEFAULT NULL,
   `description` mediumtext NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:0, Max: 2048',
   `locale_id` int(11) unsigned NOT NULL,
   `asset_unit_type_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
@@ -1112,7 +1198,7 @@ DROP TABLE IF EXISTS `asset_condition_locale`;
 
 CREATE TABLE `asset_condition_locale` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) DEFAULT NULL COMMENT 'Required, Text Field, Min:3, Max:100',
+  `name` varchar(255) DEFAULT NULL,
   `description` mediumtext NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:0, Max: 2048',
   `locale_id` int(11) unsigned NOT NULL,
   `asset_condition_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
@@ -1158,9 +1244,10 @@ DROP TABLE IF EXISTS `beneficiary`;
 
 CREATE TABLE `beneficiary` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `sequence` varchar(32) NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min:9, Max: 12',
-  `family_book_number` varchar(32) NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min:9, Max: 12',
-  `status` enum('New', 'Data Collection', 'In Review', 'Approved', 'Duplicate', 'Deleted') NOT NULL DEFAULT 'New' COMMENT 'Required, DropDownList',
+  `sequence` varchar(32) NOT NULL DEFAULT '',
+  `family_book_number` varchar(32) NOT NULL DEFAULT '',
+  `status` enum('New', 'Draft', 'In Review', 'Moved', 'Approved', 'Rejected', 'Duplicate', 'Deleted') NOT NULL DEFAULT 'New',
+  `visibility` enum('Yes', 'No') COLLATE utf8_bin NOT NULL DEFAULT 'Yes',
   `country_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_user_id` int(11) unsigned NOT NULL,
@@ -1195,6 +1282,49 @@ CREATE TABLE `beneficiary_locale` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
+# Dump of table beneficiary_movement
+# ------------------------------------------------------------
+
+DROP TABLE IF EXISTS `beneficiary_movement`;
+
+CREATE TABLE `beneficiary_movement` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `beneficiary_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
+  `new_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
+  `old_status` varchar(255) NOT NULL DEFAULT '',
+  `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
+  `owner_organization_user_id` int(11) unsigned NOT NULL,
+  `date_added` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
+  `date_updated` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
+  PRIMARY KEY (`id`),
+  KEY `beneficiary_movement_owner_organization_id` (`owner_organization_id`),
+  KEY `beneficiary_movement_owner_organization_user_id` (`owner_organization_user_id`),
+  CONSTRAINT `beneficiary_movement_ibfk_1` FOREIGN KEY (`owner_organization_id`) REFERENCES `organization` (`id`),
+  CONSTRAINT `beneficiary_movement_ibfk_2` FOREIGN KEY (`owner_organization_user_id`) REFERENCES `organization_user` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+# Dump of table beneficiary_duplicate
+# ------------------------------------------------------------
+
+DROP TABLE IF EXISTS `beneficiary_duplicate`;
+
+CREATE TABLE `beneficiary_duplicate` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `beneficiary_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
+  `duplicate_beneficiary_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
+  `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
+  `owner_organization_user_id` int(11) unsigned NOT NULL,
+  `date_added` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
+  `date_updated` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
+  PRIMARY KEY (`id`),
+  KEY `beneficiary_duplicate_owner_organization_id` (`owner_organization_id`),
+  KEY `beneficiary_duplicate_owner_organization_user_id` (`owner_organization_user_id`),
+  CONSTRAINT `beneficiary_duplicate_ibfk_1` FOREIGN KEY (`owner_organization_id`) REFERENCES `organization` (`id`),
+  CONSTRAINT `beneficiary_duplicate_ibfk_2` FOREIGN KEY (`owner_organization_user_id`) REFERENCES `organization_user` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
 # Dump of table beneficiary_has_profile
 # ------------------------------------------------------------
 
@@ -1203,7 +1333,8 @@ DROP TABLE IF EXISTS `beneficiary_has_profile`;
 CREATE TABLE `beneficiary_has_profile` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `beneficiary_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
-  `beneficiary_profile_id` int(11) unsigned NOT NULL COMMENT 'Required, DropDownList',
+  `beneficiary_profile_id` int(11) unsigned NOT NULL,
+  `status` enum('Draft', 'In Progress', 'Completed') NOT NULL DEFAULT 'Draft',
   `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_user_id` int(11) unsigned NOT NULL,
   `date_added` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
@@ -1224,7 +1355,7 @@ CREATE TABLE `beneficiary_has_profile` (
 # - Poor
 # - Widow
 # - Disabled
-# - Teacher
+# - Volunteer / Teacher/Lay Reader
 # - Medical Care
 # - Emergency
 # - Asset
@@ -1244,10 +1375,13 @@ CREATE TABLE `beneficiary_profile` (
   `home` enum('Yes', 'No') NOT NULL DEFAULT 'No' COMMENT 'Optional, DropDownList',
   `asset` enum('Yes', 'No') NOT NULL DEFAULT 'No' COMMENT 'Optional, DropDownList',
   `asset_required` enum('Yes', 'No') NOT NULL DEFAULT 'No' COMMENT 'Optional, DropDownList',
-  `profile_medical` enum('Yes', 'No') NOT NULL DEFAULT 'No' COMMENT 'Optional, DropDownList',
-  `profile_medical_examination` enum('Yes', 'No') NOT NULL DEFAULT 'No' COMMENT 'Optional, DropDownList',
+  `education` enum('Yes', 'No') NOT NULL DEFAULT 'No' COMMENT 'Optional, DropDownList',
+  `medical` enum('Yes', 'No') NOT NULL DEFAULT 'No' COMMENT 'Optional, DropDownList',
+  `medical_examination` enum('Yes', 'No') NOT NULL DEFAULT 'No' COMMENT 'Optional, DropDownList',
+  `disabled` enum('Yes', 'No') NOT NULL DEFAULT 'No' COMMENT 'Optional, DropDownList',
+  `volunteer` enum('Yes', 'No') NOT NULL DEFAULT 'No' COMMENT 'Optional, DropDownList',
+  `gallery` enum('Yes', 'No') NOT NULL DEFAULT 'No' COMMENT 'Optional, DropDownList',
   `research_notes` enum('Yes', 'No') NOT NULL DEFAULT 'No' COMMENT 'Optional, DropDownList',
-  `visibility` enum('Yes', 'No') COLLATE utf8_bin NOT NULL DEFAULT 'Yes' COMMENT 'Required, DropDownList',
   `beneficiary_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `country_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
@@ -1289,13 +1423,13 @@ DROP TABLE IF EXISTS `beneficiary_profile_details`;
 
 CREATE TABLE `beneficiary_profile_details` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `has_paterfamilias` enum('Yes', 'No') NOT NULL DEFAULT 'Yes' COMMENT 'Required, DropDownList',
-  `has_family_members` enum('Yes', 'No') NOT NULL DEFAULT 'Yes' COMMENT 'Required, DropDownList',
-  `is_father_alive` enum('Yes', 'No') NOT NULL DEFAULT 'Yes' COMMENT 'Required, DropDownList',
-  `is_mother_alive` enum('Yes', 'No') NOT NULL DEFAULT 'Yes' COMMENT 'Required, DropDownList',
-  `number_of_sons` tinyint(3) unsigned DEFAULT '0' COMMENT 'Required: Text Field, Min:0, Max:255',
-  `number_of_daughters` tinyint(3) unsigned DEFAULT '0' COMMENT 'Required: Text Field, Min:0, Max:255',
-  `has_supplies_card` enum('Yes', 'No') NOT NULL DEFAULT 'No' COMMENT 'Required, DropDownList',
+  `has_paterfamilias` enum('Yes', 'No') NOT NULL DEFAULT 'Yes',
+  `has_family_members` enum('Yes', 'No') NOT NULL DEFAULT 'Yes',
+  `is_father_alive` enum('Yes', 'No') NOT NULL DEFAULT 'Yes',
+  `is_mother_alive` enum('Yes', 'No') NOT NULL DEFAULT 'Yes',
+  `number_of_sons` tinyint(3) unsigned DEFAULT '0',
+  `number_of_daughters` tinyint(3) unsigned DEFAULT '0',
+  `has_supplies_card` enum('Yes', 'No') NOT NULL DEFAULT 'No',
   `income_total` float unsigned NOT NULL COMMENT 'Optional, Text Field, Min:1',
   `spending_total` float unsigned NOT NULL COMMENT 'Optional, Text Field, Min:1',
   `beneficiary_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
@@ -1312,114 +1446,6 @@ CREATE TABLE `beneficiary_profile_details` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
-# Dump of table beneficiary_profile_disabled
-# ------------------------------------------------------------
-
-DROP TABLE IF EXISTS `beneficiary_profile_disabled`;
-
-CREATE TABLE `beneficiary_profile_disabled` (
-  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `beneficiary_profile_disabled_type_id` int(11) unsigned NOT NULL COMMENT 'Required',
-  `beneficiary_profile_disabled_reason_id` int(11) unsigned NOT NULL COMMENT 'Required',
-  `beneficiary_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
-  `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
-  `owner_organization_user_id` int(11) unsigned NOT NULL,
-  `date_added` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
-  `date_updated` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
-  PRIMARY KEY (`id`),
-  KEY `beneficiary_profile_disabled_beneficiary_id` (`beneficiary_id`),
-  KEY `beneficiary_profile_disabled_owner_organization_user_id` (`owner_organization_user_id`),
-  CONSTRAINT `beneficiary_profile_disabled_ibfk_1` FOREIGN KEY (`beneficiary_id`) REFERENCES `beneficiary` (`id`),
-  CONSTRAINT `beneficiary_profile_disabled_ibfk_2` FOREIGN KEY (`owner_organization_user_id`) REFERENCES `organization_user` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-
-# Dump of table beneficiary_profile_disabled_type
-# - Physical
-# - Mental
-# - Social
-# ------------------------------------------------------------
-
-DROP TABLE IF EXISTS `beneficiary_profile_disabled_type`;
-
-CREATE TABLE `beneficiary_profile_disabled_type` (
-  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `published` enum('Yes', 'No') COLLATE utf8_bin NOT NULL DEFAULT 'Yes' COMMENT 'Required, DropDownList',
-  `country_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
-  `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
-  `owner_organization_user_id` int(11) unsigned NOT NULL,
-  `date_added` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
-  `date_updated` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
-  PRIMARY KEY (`id`),
-  KEY `beneficiary_profile_disabled_type_owner_organization_user_id` (`owner_organization_user_id`),
-  CONSTRAINT `beneficiary_profile_disabled_type_ibfk_1` FOREIGN KEY (`owner_organization_user_id`) REFERENCES `organization_user` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-
-# Dump of table beneficiary_profile_disabled_type_locale
-# ------------------------------------------------------------
-
-DROP TABLE IF EXISTS `beneficiary_profile_disabled_type_locale`;
-
-CREATE TABLE `beneficiary_profile_disabled_type_locale` (
-  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) DEFAULT NULL COMMENT 'Required, Text Field, Min:3, Max:100',
-  `description` mediumtext NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:0, Max: 2048',
-  `locale_id` int(11) unsigned NOT NULL,
-  `beneficiary_profile_disabled_type_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
-  `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
-  `owner_organization_user_id` int(11) unsigned NOT NULL,
-  `date_added` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
-  `date_updated` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-
-# Dump of table beneficiary_profile_disabled_reason
-# - Genetic
-# - Pregnancy defect
-# - Childbirth defect
-# - Infection
-# - Accident
-# - Environmental
-# - Other
-# ------------------------------------------------------------
-
-DROP TABLE IF EXISTS `beneficiary_profile_disabled_reason`;
-
-CREATE TABLE `beneficiary_profile_disabled_reason` (
-  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `published` enum('Yes', 'No') COLLATE utf8_bin NOT NULL DEFAULT 'Yes' COMMENT 'Required, DropDownList',
-  `country_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
-  `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
-  `owner_organization_user_id` int(11) unsigned NOT NULL,
-  `date_added` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
-  `date_updated` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
-  PRIMARY KEY (`id`),
-  KEY `beneficiary_profile_disabled_reason_owner_organization_user_id` (`owner_organization_user_id`),
-  CONSTRAINT `beneficiary_profile_disabled_reason_ibfk_1` FOREIGN KEY (`owner_organization_user_id`) REFERENCES `organization_user` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-
-# Dump of table beneficiary_profile_disabled_reason_locale
-# ------------------------------------------------------------
-
-DROP TABLE IF EXISTS `beneficiary_profile_disabled_reason_locale`;
-
-CREATE TABLE `beneficiary_profile_disabled_reason_locale` (
-  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) DEFAULT NULL COMMENT 'Required, Text Field, Min:3, Max:100',
-  `description` mediumtext NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:0, Max: 2048',
-  `locale_id` int(11) unsigned NOT NULL,
-  `beneficiary_profile_disabled_reason_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
-  `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
-  `owner_organization_user_id` int(11) unsigned NOT NULL,
-  `date_added` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
-  `date_updated` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-
 # Dump of table beneficiary_profile_family
 # ------------------------------------------------------------
 
@@ -1427,23 +1453,22 @@ DROP TABLE IF EXISTS `beneficiary_profile_family`;
 
 CREATE TABLE `beneficiary_profile_family` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `ssn` varchar(32) NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min:9, Max:12',
+  `ssn` varchar(32) NOT NULL DEFAULT '',
   `phone_number` varchar(17) NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:12, Max: 14',
-  `mobile_number` varchar(17) NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min:12, Max: 14',
-  `email` varchar(255) NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min:3, Max:254',
-  `nationality_id` int(11) unsigned NOT NULL COMMENT 'Required, DropDownList',
-  `country_id` int(11) unsigned NOT NULL COMMENT 'Required, DropDownList',
-  `city_id` int(11) unsigned NOT NULL COMMENT 'Required, DropDownList',
-  `date_of_birth` date DEFAULT NULL COMMENT 'Required, Calender',
+  `mobile_number` varchar(17) NOT NULL DEFAULT '',
+  `email` varchar(255) NOT NULL DEFAULT '',
+  `nationality_id` int(11) unsigned NOT NULL,
+  `country_id` int(11) unsigned NOT NULL,
+  `city_id` int(11) unsigned NOT NULL,
+  `date_of_birth` date DEFAULT NULL,
   `avatar` varchar(1024) NOT NULL DEFAULT '',
-  `beneficiary_relation_id` int(11) unsigned NOT NULL COMMENT 'Required, DropDownList',
-  `marital_status_id` tinyint(3) unsigned DEFAULT '0' COMMENT 'Required: Text Field, Min:0, Max:255',
-  `education_level_id` tinyint(3) unsigned DEFAULT '0' COMMENT 'Required: Text Field, Min:0, Max:255',
-  `medical_condition_id` tinyint(3) unsigned DEFAULT '0' COMMENT 'Required, DropDownList',
-  `beneficiary_profile_family_profession_id` tinyint(3) unsigned DEFAULT '0' COMMENT 'Required, DropDownList',
+  `beneficiary_relation_id` int(11) unsigned NOT NULL,
+  `marital_status_id` tinyint(3) unsigned DEFAULT '0',
+  `education_level_id` tinyint(3) unsigned DEFAULT '0',
+  `medical_condition_id` tinyint(3) unsigned DEFAULT '0',
+  `beneficiary_profile_family_profession_id` tinyint(3) unsigned DEFAULT '0',
   `death_date` date DEFAULT NULL COMMENT 'Optional, Calender',
-  `death_reason_id` tinyint(3) unsigned DEFAULT '0' COMMENT 'Required, DropDownList',
-  `donor_id` int(11) unsigned NOT NULL COMMENT 'Required, DropDownList',
+  `death_reason_id` tinyint(3) unsigned DEFAULT '0',
   `beneficiary_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_user_id` int(11) unsigned NOT NULL,
@@ -1467,14 +1492,14 @@ DROP TABLE IF EXISTS `beneficiary_profile_family_locale`;
 
 CREATE TABLE `beneficiary_profile_family_locale` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `first_name` varchar(255) NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min:3, Max: 50',
-  `second_name` varchar(255) NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min:3, Max: 50',
-  `third_name` varchar(255) NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min:3, Max: 50',
-  `last_name` varchar(255) NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min:3, Max: 50',
-  `address` varchar(255) NOT NULL DEFAULT '' COMMENT 'Required, Textarea, Min:3, Max: 50',
+  `first_name` varchar(255) NOT NULL DEFAULT '',
+  `second_name` varchar(255) NOT NULL DEFAULT '',
+  `third_name` varchar(255) NOT NULL DEFAULT '',
+  `last_name` varchar(255) NOT NULL DEFAULT '',
+  `address` varchar(255) NOT NULL DEFAULT '',
   `locale_id` int(11) unsigned NOT NULL,
   `beneficiary_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
-  `beneficiary_family_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
+  `beneficiary_profile_family_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_user_id` int(11) unsigned NOT NULL,
   `date_added` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
@@ -1490,22 +1515,23 @@ DROP TABLE IF EXISTS `beneficiary_profile_family_sponsorship`;
 
 CREATE TABLE `beneficiary_profile_family_sponsorship` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `beneficiary_profile_family_id` tinyint(3) unsigned DEFAULT '0' COMMENT 'Required, DropDownList',
+  `beneficiary_profile_family_id` tinyint(3) unsigned DEFAULT '0',
   `beneficiary_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
-  `donor_id` int(11) unsigned NOT NULL COMMENT 'Required, DropDownList',
-  `currency` varchar(3) COLLATE utf8_bin NOT NULL DEFAULT 'USD',
-  `currency_exchange_rate_id` int(11) unsigned NOT NULL COMMENT 'Required, DropDownList',
+  `donor_id` int(11) unsigned NOT NULL,
+  `frequency` enum('One Time', 'Daily', 'Weekly', 'Monthly', 'Quarterly', 'Annual') DEFAULT 'One Time',
   `amount` float unsigned NOT NULL COMMENT 'Optional, Text Field, Min:0.1',
+  `currency` varchar(3) COLLATE utf8_bin NOT NULL DEFAULT 'USD',
+  `currency_exchange_rate_id` int(11) unsigned NOT NULL,
   `status` enum('Active', 'Inactive') DEFAULT 'Active',
   `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_user_id` int(11) unsigned NOT NULL,
   `date_added` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
   `date_updated` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
   PRIMARY KEY (`id`),
-  KEY `beneficiary_profile_family_sponsorship_beneficiary_id` (`beneficiary_id`),
-  KEY `beneficiary_profile_family_sponsorship_owner_organization_user_id` (`owner_organization_user_id`),
-  CONSTRAINT `beneficiary_profile_family_sponsorship_ibfk_2` FOREIGN KEY (`beneficiary_id`) REFERENCES `beneficiary` (`id`),
-  CONSTRAINT `beneficiary_profile_family_sponsorship_ibfk_3` FOREIGN KEY (`owner_organization_user_id`) REFERENCES `organization_user` (`id`)
+  KEY `beneficiary_sponsorship_beneficiary_id` (`beneficiary_id`),
+  KEY `beneficiary_sponsorship_owner_organization_user_id` (`owner_organization_user_id`),
+  CONSTRAINT `beneficiary_sponsorship_ibfk_2` FOREIGN KEY (`beneficiary_id`) REFERENCES `beneficiary` (`id`),
+  CONSTRAINT `beneficiary_sponsorship_ibfk_3` FOREIGN KEY (`owner_organization_user_id`) REFERENCES `organization_user` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
@@ -1517,7 +1543,8 @@ DROP TABLE IF EXISTS `beneficiary_profile_family_has_flag`;
 CREATE TABLE `beneficiary_profile_family_has_flag` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `beneficiary_profile_family_flag_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
-  `flag_value` enum('Yes', 'No') NOT NULL DEFAULT 'Yes' COMMENT 'Required, DropDownList',
+  `flag_value` enum('Yes', 'No') NOT NULL DEFAULT 'Yes',
+  `beneficiary_profile_family_id` tinyint(3) unsigned DEFAULT '0',
   `beneficiary_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_user_id` int(11) unsigned NOT NULL,
@@ -1547,7 +1574,7 @@ DROP TABLE IF EXISTS `beneficiary_profile_family_flag`;
 
 CREATE TABLE `beneficiary_profile_family_flag` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `published` enum('Yes', 'No') COLLATE utf8_bin NOT NULL DEFAULT 'Yes' COMMENT 'Required, DropDownList',
+  `published` enum('Yes', 'No') COLLATE utf8_bin NOT NULL DEFAULT 'Yes',
   `country_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_user_id` int(11) unsigned NOT NULL,
@@ -1566,7 +1593,7 @@ DROP TABLE IF EXISTS `beneficiary_profile_family_flag_locale`;
 
 CREATE TABLE `beneficiary_profile_family_flag_locale` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `flag_name` varchar(255) NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min:3, Max: 50',
+  `flag_name` varchar(255) NOT NULL DEFAULT '',
   `locale_id` int(11) unsigned NOT NULL,
   `beneficiary_profile_family_flag_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
@@ -1592,7 +1619,7 @@ DROP TABLE IF EXISTS `beneficiary_profile_family_profession`;
 
 CREATE TABLE `beneficiary_profile_family_profession` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `published` enum('Yes', 'No') COLLATE utf8_bin NOT NULL DEFAULT 'Yes' COMMENT 'Required, DropDownList',
+  `published` enum('Yes', 'No') COLLATE utf8_bin NOT NULL DEFAULT 'Yes',
   `country_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_user_id` int(11) unsigned NOT NULL,
@@ -1609,7 +1636,7 @@ DROP TABLE IF EXISTS `beneficiary_profile_family_profession_locale`;
 
 CREATE TABLE `beneficiary_profile_family_profession_locale` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) DEFAULT NULL COMMENT 'Required, Text Field, Min:3, Max:100',
+  `name` varchar(255) DEFAULT NULL,
   `description` mediumtext NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:0, Max: 2048',
   `locale_id` int(11) unsigned NOT NULL,
   `beneficiary_profile_family_profession_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
@@ -1631,7 +1658,9 @@ CREATE TABLE `beneficiary_profile_income` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `beneficiary_profile_income_type_id` float unsigned NOT NULL COMMENT 'Optional, Text Field, Min:1',
   `amount` float unsigned NOT NULL COMMENT 'Optional, Text Field, Min:1',
-  `frequent` enum('Daily', 'Weekly', 'Monthly', 'Quarterly', 'Annual') DEFAULT 'Monthly',
+  `currency` varchar(3) COLLATE utf8_bin NOT NULL DEFAULT 'USD',
+  `currency_exchange_rate_id` int(11) unsigned NOT NULL,
+  `frequency` enum('Daily', 'Weekly', 'Monthly', 'Quarterly', 'Annual') DEFAULT 'Monthly',
   `status` enum('Active', 'Inactive') DEFAULT 'Active',
   `beneficiary_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
@@ -1666,7 +1695,7 @@ DROP TABLE IF EXISTS `beneficiary_profile_income_type`;
 
 CREATE TABLE `beneficiary_profile_income_type` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `published` enum('Yes', 'No') COLLATE utf8_bin NOT NULL DEFAULT 'Yes' COMMENT 'Required, DropDownList',
+  `published` enum('Yes', 'No') COLLATE utf8_bin NOT NULL DEFAULT 'Yes',
   `country_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_user_id` int(11) unsigned NOT NULL,
@@ -1683,7 +1712,7 @@ DROP TABLE IF EXISTS `beneficiary_profile_income_type_locale`;
 
 CREATE TABLE `beneficiary_profile_income_type_locale` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) DEFAULT NULL COMMENT 'Required, Text Field, Min:3, Max:100',
+  `name` varchar(255) DEFAULT NULL,
   `description` mediumtext NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:0, Max: 2048',
   `locale_id` int(11) unsigned NOT NULL,
   `beneficiary_profile_income_type_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
@@ -1703,8 +1732,10 @@ DROP TABLE IF EXISTS `beneficiary_profile_spending`;
 CREATE TABLE `beneficiary_profile_spending` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `beneficiary_profile_spending_type_id` float unsigned NOT NULL COMMENT 'Optional, Text Field, Min:1',
-  `frequent` enum('Daily', 'Weekly', 'Monthly', 'Quarterly', 'Annual') DEFAULT 'Monthly',
   `amount` float unsigned NOT NULL COMMENT 'Optional, Text Field, Min:1',
+  `currency` varchar(3) COLLATE utf8_bin NOT NULL DEFAULT 'USD',
+  `currency_exchange_rate_id` int(11) unsigned NOT NULL,
+  `frequency` enum('Daily', 'Weekly', 'Monthly', 'Quarterly', 'Annual') DEFAULT 'Monthly',
   `beneficiary_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_user_id` int(11) unsigned NOT NULL,
@@ -1737,7 +1768,7 @@ DROP TABLE IF EXISTS `beneficiary_profile_spending_type`;
 
 CREATE TABLE `beneficiary_profile_spending_type` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `published` enum('Yes', 'No') COLLATE utf8_bin NOT NULL DEFAULT 'Yes' COMMENT 'Required, DropDownList',
+  `published` enum('Yes', 'No') COLLATE utf8_bin NOT NULL DEFAULT 'Yes',
   `country_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_user_id` int(11) unsigned NOT NULL,
@@ -1754,7 +1785,7 @@ DROP TABLE IF EXISTS `beneficiary_profile_spending_type_locale`;
 
 CREATE TABLE `beneficiary_profile_spending_type_locale` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) DEFAULT NULL COMMENT 'Required, Text Field, Min:3, Max:100',
+  `name` varchar(255) DEFAULT NULL,
   `description` mediumtext NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:0, Max: 2048',
   `locale_id` int(11) unsigned NOT NULL,
   `beneficiary_profile_spending_type_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
@@ -1773,9 +1804,9 @@ DROP TABLE IF EXISTS `beneficiary_profile_asset`;
 
 CREATE TABLE `beneficiary_profile_asset` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `asset_type_id` int(11) unsigned NOT NULL COMMENT 'Required, DropDownList',
-  `asset_id` int(11) unsigned NOT NULL COMMENT 'Required, DropDownList',
-  `asset_condition_id` int(11) unsigned NOT NULL COMMENT 'Required, DropDownList',
+  `asset_type_id` int(11) unsigned NOT NULL,
+  `asset_id` int(11) unsigned NOT NULL,
+  `asset_condition_id` int(11) unsigned NOT NULL,
   `beneficiary_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_user_id` int(11) unsigned NOT NULL,
@@ -1796,13 +1827,14 @@ DROP TABLE IF EXISTS `beneficiary_profile_asset_received`;
 
 CREATE TABLE `beneficiary_profile_asset_received` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `asset_id` int(11) unsigned NOT NULL COMMENT 'Required, Drop Down',
+  `asset_id` int(11) unsigned NOT NULL,
   `asset_type_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `asset_unit_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `asset_quantity` float unsigned NOT NULL COMMENT 'Optional, Text Field, Min:0.1',
-  `asset_condition_id` int(11) unsigned NOT NULL COMMENT 'Required, DropDownList',
+  `asset_condition_id` int(11) unsigned NOT NULL,
   `asset_value` float unsigned NOT NULL COMMENT 'Optional, Text Field, Min:0.1',
-  `status` enum('Waiting', 'Out For Delivery', 'Received') DEFAULT 'Waiting',
+  `receipt_number` varchar(50) DEFAULT NULL,
+  `status` enum('Pending', 'Out For Delivery', 'Received') DEFAULT 'Pending',
   `donor_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `beneficiary_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
@@ -1824,12 +1856,12 @@ DROP TABLE IF EXISTS `beneficiary_profile_asset_required`;
 
 CREATE TABLE `beneficiary_profile_asset_required` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `asset_id` int(11) unsigned NOT NULL COMMENT 'Required, Drop Down',
+  `asset_id` int(11) unsigned NOT NULL,
   `asset_type_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `asset_unit_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
-  `asset_condition_id` int(11) unsigned NOT NULL COMMENT 'Required, DropDownList',
+  `asset_condition_id` int(11) unsigned NOT NULL,
   `asset_quantity` float unsigned NOT NULL COMMENT 'Optional, Text Field, Min:0.1',
-  `status` enum('Waiting', 'Approved', 'Rejected', 'Out of Stock', 'Received') DEFAULT 'Waiting',
+  `status` enum('Pending', 'Approved', 'Rejected', 'Out of Stock', 'Received') DEFAULT 'Pending',
   `beneficiary_profile_asset_received_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `beneficiary_profile_asset_received_date` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
   `beneficiary_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
@@ -1852,13 +1884,13 @@ DROP TABLE IF EXISTS `beneficiary_profile_home`;
 
 CREATE TABLE `beneficiary_profile_home` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `owner_phone_number` varchar(17) NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min:8, Max: 50',
-  `beneficiary_profile_home_construction_type_id` int(11) unsigned NOT NULL COMMENT 'Required, DropDownList',
-  `beneficiary_profile_home_contract_type_id` int(11) unsigned NOT NULL COMMENT 'Required, DropDownList',
-  `construction_area_in_square_meter` float unsigned NOT NULL COMMENT 'Required, Text Field, Min: 4, Max:1024',
-  `number_of_floors` tinyint(3) unsigned NOT NULL COMMENT 'Required: Text Field, Min:0, Max:255',
-  `number_of_rooms` tinyint(3) unsigned NOT NULL COMMENT 'Required: Text Field, Min:0, Max:255',
-  `number_of_residents` tinyint(3) unsigned NOT NULL COMMENT 'Required: Text Field, Min:0, Max:255',
+  `building_owner_phone_number` varchar(17) NOT NULL DEFAULT '',
+  `beneficiary_profile_home_construction_type_id` int(11) unsigned NOT NULL,
+  `beneficiary_profile_home_contract_type_id` int(11) unsigned NOT NULL,
+  `construction_area_in_square_meter` float unsigned NOT NULL,
+  `number_of_floors` tinyint(3) unsigned NOT NULL,
+  `number_of_rooms` tinyint(3) unsigned NOT NULL,
+  `number_of_residents` tinyint(3) unsigned NOT NULL,
   `beneficiary_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_user_id` int(11) unsigned NOT NULL,
@@ -1880,7 +1912,7 @@ DROP TABLE IF EXISTS `beneficiary_profile_home_locale`;
 CREATE TABLE `beneficiary_profile_home_locale` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `description` mediumtext NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:0, Max: 2048',
-  `owner_name` varchar(255) NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min:8, Max: 50',
+  `building_owner_name` varchar(255) NOT NULL DEFAULT '',
   `locale_id` int(11) unsigned NOT NULL,
   `beneficiary_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `beneficiary_profile_home_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
@@ -1905,7 +1937,7 @@ DROP TABLE IF EXISTS `beneficiary_profile_home_construction_type`;
 
 CREATE TABLE `beneficiary_profile_home_construction_type` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `published` enum('Yes', 'No') COLLATE utf8_bin NOT NULL DEFAULT 'Yes' COMMENT 'Required, DropDownList',
+  `published` enum('Yes', 'No') COLLATE utf8_bin NOT NULL DEFAULT 'Yes',
   `country_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_user_id` int(11) unsigned NOT NULL,
@@ -1922,7 +1954,7 @@ DROP TABLE IF EXISTS `beneficiary_profile_home_construction_type_locale`;
 
 CREATE TABLE `beneficiary_profile_home_construction_type_locale` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) DEFAULT NULL COMMENT 'Required, Text Field, Min:3, Max:100',
+  `name` varchar(255) DEFAULT NULL,
   `description` mediumtext NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:0, Max: 2048',
   `locale_id` int(11) unsigned NOT NULL,
   `beneficiary_profile_home_construction_type_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
@@ -1945,7 +1977,7 @@ DROP TABLE IF EXISTS `beneficiary_profile_home_contract_type`;
 
 CREATE TABLE `beneficiary_profile_home_contract_type` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `published` enum('Yes', 'No') COLLATE utf8_bin NOT NULL DEFAULT 'Yes' COMMENT 'Required, DropDownList',
+  `published` enum('Yes', 'No') COLLATE utf8_bin NOT NULL DEFAULT 'Yes',
   `country_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_user_id` int(11) unsigned NOT NULL,
@@ -1962,10 +1994,119 @@ DROP TABLE IF EXISTS `beneficiary_profile_home_contract_type_locale`;
 
 CREATE TABLE `beneficiary_profile_home_contract_type_locale` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) DEFAULT NULL COMMENT 'Required, Text Field, Min:3, Max:100',
+  `name` varchar(255) DEFAULT NULL,
   `description` mediumtext NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:0, Max: 2048',
   `locale_id` int(11) unsigned NOT NULL,
   `beneficiary_profile_home_contract_type_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
+  `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
+  `owner_organization_user_id` int(11) unsigned NOT NULL,
+  `date_added` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
+  `date_updated` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+# Dump of table beneficiary_profile_disabled
+# ------------------------------------------------------------
+
+DROP TABLE IF EXISTS `beneficiary_profile_disabled`;
+
+CREATE TABLE `beneficiary_profile_disabled` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `beneficiary_profile_disabled_type_id` int(11) unsigned NOT NULL,
+  `beneficiary_profile_disabled_reason_id` int(11) unsigned NOT NULL,
+  `beneficiary_profile_family_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
+  `beneficiary_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
+  `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
+  `owner_organization_user_id` int(11) unsigned NOT NULL,
+  `date_added` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
+  `date_updated` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
+  PRIMARY KEY (`id`),
+  KEY `beneficiary_profile_disabled_beneficiary_id` (`beneficiary_id`),
+  KEY `beneficiary_profile_disabled_owner_organization_user_id` (`owner_organization_user_id`),
+  CONSTRAINT `beneficiary_profile_disabled_ibfk_1` FOREIGN KEY (`beneficiary_id`) REFERENCES `beneficiary` (`id`),
+  CONSTRAINT `beneficiary_profile_disabled_ibfk_2` FOREIGN KEY (`owner_organization_user_id`) REFERENCES `organization_user` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+# Dump of table beneficiary_profile_disabled_type
+# - Physical
+# - Mental
+# - Social
+# ------------------------------------------------------------
+
+DROP TABLE IF EXISTS `beneficiary_profile_disabled_type`;
+
+CREATE TABLE `beneficiary_profile_disabled_type` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `published` enum('Yes', 'No') COLLATE utf8_bin NOT NULL DEFAULT 'Yes',
+  `country_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
+  `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
+  `owner_organization_user_id` int(11) unsigned NOT NULL,
+  `date_added` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
+  `date_updated` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
+  PRIMARY KEY (`id`),
+  KEY `beneficiary_profile_disabled_type_owner_organization_user_id` (`owner_organization_user_id`),
+  CONSTRAINT `beneficiary_profile_disabled_type_ibfk_1` FOREIGN KEY (`owner_organization_user_id`) REFERENCES `organization_user` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+# Dump of table beneficiary_profile_disabled_type_locale
+# ------------------------------------------------------------
+
+DROP TABLE IF EXISTS `beneficiary_profile_disabled_type_locale`;
+
+CREATE TABLE `beneficiary_profile_disabled_type_locale` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) DEFAULT NULL,
+  `description` mediumtext NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:0, Max: 2048',
+  `locale_id` int(11) unsigned NOT NULL,
+  `beneficiary_profile_disabled_type_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
+  `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
+  `owner_organization_user_id` int(11) unsigned NOT NULL,
+  `date_added` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
+  `date_updated` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+# Dump of table beneficiary_profile_disabled_reason
+# - Genetic
+# - Pregnancy defect
+# - Childbirth defect
+# - Infection
+# - Accident
+# - Environmental
+# - Other
+# ------------------------------------------------------------
+
+DROP TABLE IF EXISTS `beneficiary_profile_disabled_reason`;
+
+CREATE TABLE `beneficiary_profile_disabled_reason` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `published` enum('Yes', 'No') COLLATE utf8_bin NOT NULL DEFAULT 'Yes',
+  `country_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
+  `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
+  `owner_organization_user_id` int(11) unsigned NOT NULL,
+  `date_added` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
+  `date_updated` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
+  PRIMARY KEY (`id`),
+  KEY `beneficiary_profile_disabled_reason_owner_organization_user_id` (`owner_organization_user_id`),
+  CONSTRAINT `beneficiary_profile_disabled_reason_ibfk_1` FOREIGN KEY (`owner_organization_user_id`) REFERENCES `organization_user` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+# Dump of table beneficiary_profile_disabled_reason_locale
+# ------------------------------------------------------------
+
+DROP TABLE IF EXISTS `beneficiary_profile_disabled_reason_locale`;
+
+CREATE TABLE `beneficiary_profile_disabled_reason_locale` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) DEFAULT NULL,
+  `description` mediumtext NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:0, Max: 2048',
+  `locale_id` int(11) unsigned NOT NULL,
+  `beneficiary_profile_disabled_reason_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_user_id` int(11) unsigned NOT NULL,
   `date_added` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
@@ -1982,7 +2123,7 @@ DROP TABLE IF EXISTS `beneficiary_relation`;
 CREATE TABLE `beneficiary_relation` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `allow_recurrence` enum('Yes', 'No') NOT NULL DEFAULT 'Yes' COMMENT 'Optional, DropDownList. For example, the father should not be allowed to be repeated for the same beneficiary',
-  `published` enum('Yes', 'No') COLLATE utf8_bin NOT NULL DEFAULT 'Yes' COMMENT 'Required, DropDownList',
+  `published` enum('Yes', 'No') COLLATE utf8_bin NOT NULL DEFAULT 'Yes',
   `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_user_id` int(11) unsigned NOT NULL,
   `date_added` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
@@ -2000,12 +2141,285 @@ DROP TABLE IF EXISTS `beneficiary_relation_locale`;
 
 CREATE TABLE `beneficiary_relation_locale` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) DEFAULT NULL COMMENT 'Required, Text Field, Min:3, Max:100',
+  `name` varchar(255) DEFAULT NULL,
   `locale_id` int(11) unsigned NOT NULL,
   `beneficiary_relation_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_user_id` int(11) unsigned NOT NULL,
   `date_added` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
+  `date_updated` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+# Dump of table beneficiary_profile_education_level
+# ------------------------------------------------------------
+
+DROP TABLE IF EXISTS `beneficiary_profile_education_level`;
+
+CREATE TABLE `beneficiary_profile_education_level` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `school_type` enum('Pre KG', 'KG', 'Elementary School', 'Intermediate School', 'High School', 'Industrial Education', 'Diploma', 'University', 'Academy') NOT NULL DEFAULT 'Diploma',
+  `start_at` date NOT NULL COMMENT 'Optional, Calender',
+  `end_at` date NOT NULL COMMENT 'Optional, Calender',
+  `beneficiary_profile_family_id` int(11) unsigned NOT NULL,
+  `beneficiary_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
+  `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
+  `owner_organization_user_id` int(11) unsigned NOT NULL,
+  `date_added` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
+  `date_updated` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
+  PRIMARY KEY (`id`),
+  KEY `beneficiary_profile_education_level_beneficiary_id` (`beneficiary_id`),
+  KEY `beneficiary_profile_education_level_owner_organization_user_id` (`owner_organization_user_id`),
+  CONSTRAINT `beneficiary_profile_education_level_ibfk_1` FOREIGN KEY (`beneficiary_id`) REFERENCES `beneficiary` (`id`),
+  CONSTRAINT `beneficiary_profile_education_level_ibfk_2` FOREIGN KEY (`owner_organization_user_id`) REFERENCES `organization_user` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+# Dump of table beneficiary_profile_education_level_locale
+# ------------------------------------------------------------
+
+DROP TABLE IF EXISTS `beneficiary_profile_education_level_locale`;
+
+CREATE TABLE `beneficiary_profile_education_level_locale` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `institute_name` varchar(255) NOT NULL DEFAULT '',
+  `school_name` varchar(255) NOT NULL DEFAULT '',
+  `level_name` varchar(255) NOT NULL DEFAULT '',
+  `major_name` varchar(255) NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:3, Max: 50',
+  `class_name` varchar(255) NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:3, Max: 50',
+  `address` varchar(255) NOT NULL DEFAULT '' COMMENT 'Optional, Textarea, Min:3, Max: 50',
+  `final_grade` float unsigned NOT NULL COMMENT 'Optional, Text Field, Min:0.1',
+  `beneficiary_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
+  `beneficiary_profile_education_level_id` int(11) unsigned NOT NULL,
+  `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
+  `owner_organization_user_id` int(11) unsigned NOT NULL,
+  `date_added` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
+  `date_updated` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
+  PRIMARY KEY (`id`),
+  KEY `beneficiary_education_level_locale_beneficiary_id` (`beneficiary_id`),
+  KEY `beneficiary_education_level_locale_owner_organization_user_id` (`owner_organization_user_id`),
+  CONSTRAINT `beneficiary_education_level_locale_ibfk_1` FOREIGN KEY (`beneficiary_id`) REFERENCES `beneficiary` (`id`),
+  CONSTRAINT `beneficiary_education_level_locale_ibfk_2` FOREIGN KEY (`owner_organization_user_id`) REFERENCES `organization_user` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+# Dump of table beneficiary_profile_volunteer
+# ------------------------------------------------------------
+
+DROP TABLE IF EXISTS `beneficiary_profile_volunteer`;
+
+CREATE TABLE `beneficiary_profile_volunteer` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `volunteer_type_id` int(11) unsigned NOT NULL,
+  `beneficiary_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
+  `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
+  `owner_organization_user_id` int(11) unsigned NOT NULL,
+  `date_added` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
+  `date_updated` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
+  PRIMARY KEY (`id`),
+  KEY `beneficiary_profile_volunteer_beneficiary_id` (`beneficiary_id`),
+  KEY `beneficiary_profile_volunteer_owner_organization_user_id` (`owner_organization_user_id`),
+  CONSTRAINT `beneficiary_profile_volunteer_ibfk_1` FOREIGN KEY (`beneficiary_id`) REFERENCES `beneficiary` (`id`),
+  CONSTRAINT `beneficiary_profile_volunteer_ibfk_2` FOREIGN KEY (`owner_organization_user_id`) REFERENCES `organization_user` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+# Dump of table beneficiary_profile_volunteer_locale
+# ------------------------------------------------------------
+
+DROP TABLE IF EXISTS `beneficiary_profile_volunteer_locale`;
+
+CREATE TABLE `beneficiary_profile_volunteer_locale` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `details` mediumtext NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:0, Max: 2048',
+  `address` varchar(255) NOT NULL DEFAULT '' COMMENT 'Optional, Textarea, Min:3, Max: 50',
+  `locale_id` int(11) unsigned NOT NULL,
+  `beneficiary_id` int(11) unsigned NOT NULL COMMENT 'From Session',
+  `beneficiary_profile_volunteer_id` int(11) unsigned NOT NULL COMMENT 'From Session',
+  `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
+  `owner_organization_user_id` int(11) unsigned NOT NULL,
+  `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP  COMMENT 'To be filled dynamically, Only shows in views',
+  `date_updated` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+# Dump of table beneficiary_profile_volunteer_activity
+# ------------------------------------------------------------
+
+DROP TABLE IF EXISTS `beneficiary_profile_volunteer_activity`;
+
+CREATE TABLE `beneficiary_profile_volunteer_activity` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `sequence` tinyint(11) unsigned NOT NULL DEFAULT '1',
+  `beneficiary_id` int(11) unsigned NOT NULL COMMENT 'From Session',
+  `beneficiary_profile_volunteer_id` int(11) unsigned NOT NULL COMMENT 'From Session',
+  `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
+  `owner_organization_user_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
+  `date_added` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
+  `date_updated` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
+  PRIMARY KEY (`id`),
+  KEY `beneficiary_profile_volunteer_activity_beneficiary_id` (`beneficiary_id`),
+  CONSTRAINT `beneficiary_profile_volunteer_activity_ibfk_1` FOREIGN KEY (`beneficiary_id`) REFERENCES `beneficiary` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+# Dump of table beneficiary_profile_volunteer_activity_locale
+# ------------------------------------------------------------
+
+DROP TABLE IF EXISTS `beneficiary_profile_volunteer_activity_locale`;
+
+CREATE TABLE `beneficiary_profile_volunteer_activity_locale` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL DEFAULT '',
+  `description` mediumtext NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:0, Max: 2048',
+  `locale_id` int(11) unsigned NOT NULL,
+  `beneficiary_id` int(11) unsigned NOT NULL COMMENT 'From Session',
+  `beneficiary_profile_volunteer_id` int(11) unsigned NOT NULL COMMENT 'From Session',
+  `beneficiary_profile_volunteer_activity_id` int(11) unsigned NOT NULL COMMENT 'From Session',
+  `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
+  `owner_organization_user_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
+  `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP  COMMENT 'To be filled dynamically, Only shows in views',
+  `date_updated` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+# Dump of table beneficiary_profile_volunteer_type
+# - Teacher / Lay Reader
+# - Senior People / Sitter / Re3aieh / Nany
+# - Food Operation
+# ------------------------------------------------------------
+
+DROP TABLE IF EXISTS `beneficiary_profile_volunteer_type`;
+
+CREATE TABLE `beneficiary_profile_volunteer_type` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `published` enum('Yes', 'No') COLLATE utf8_bin NOT NULL DEFAULT 'Yes',
+  `country_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
+  `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
+  `owner_organization_user_id` int(11) unsigned NOT NULL,
+  `date_added` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
+  `date_updated` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
+  PRIMARY KEY (`id`),
+  KEY `beneficiary_profile_volunteer_type_owner_organization_user_id` (`owner_organization_user_id`),
+  CONSTRAINT `beneficiary_profile_volunteer_type_ibfk_1` FOREIGN KEY (`owner_organization_user_id`) REFERENCES `organization_user` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+# Dump of table beneficiary_profile_volunteer_type_locale
+# ------------------------------------------------------------
+
+DROP TABLE IF EXISTS `beneficiary_profile_volunteer_type_locale`;
+
+CREATE TABLE `beneficiary_profile_volunteer_type_locale` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) DEFAULT NULL,
+  `description` mediumtext NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:0, Max: 2048',
+  `locale_id` int(11) unsigned NOT NULL,
+  `beneficiary_profile_volunteer_type_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
+  `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
+  `owner_organization_user_id` int(11) unsigned NOT NULL,
+  `date_added` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
+  `date_updated` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+# Dump of table beneficiary_profile_medical
+# ------------------------------------------------------------
+
+DROP TABLE IF EXISTS `beneficiary_profile_medical`;
+
+CREATE TABLE `beneficiary_profile_medical` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `beneficiary_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
+  `beneficiary_profile_family_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
+  `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
+  `owner_organization_user_id` int(11) unsigned NOT NULL,
+  `date_added` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
+  `date_updated` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
+  PRIMARY KEY (`id`),
+  KEY `beneficiary_profile_medical_beneficiary_id` (`beneficiary_id`),
+  KEY `beneficiary_profile_medical_owner_organization_user_id` (`owner_organization_user_id`),
+  CONSTRAINT `beneficiary_profile_medical_ibfk_1` FOREIGN KEY (`beneficiary_id`) REFERENCES `beneficiary` (`id`),
+  CONSTRAINT `beneficiary_profile_medical_ibfk_2` FOREIGN KEY (`owner_organization_user_id`) REFERENCES `organization_user` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+# Dump of table beneficiary_profile_medical_locale
+# ------------------------------------------------------------
+
+DROP TABLE IF EXISTS `beneficiary_profile_medical_locale`;
+
+CREATE TABLE `beneficiary_profile_medical_locale` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `current_medical_condition` mediumtext NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:3, Max: 50',
+  `medical_history` mediumtext NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:3, Max: 50',
+  `surgical_history` mediumtext NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:3, Max: 50',
+  `family_history` mediumtext NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:3, Max: 50',
+  `treatment_history` mediumtext NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:3, Max: 50',
+  `lab_results_history` mediumtext NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:3, Max: 50',
+  `prescription_history` mediumtext NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:3, Max: 50',
+  `locale_id` int(11) unsigned NOT NULL,
+  `beneficiary_id` int(11) unsigned NOT NULL COMMENT 'From Session',
+  `beneficiary_profile_family_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
+  `beneficiary_profile_medical_id` int(11) unsigned NOT NULL COMMENT 'From Session',
+  `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
+  `owner_organization_user_id` int(11) unsigned NOT NULL,
+  `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP  COMMENT 'To be filled dynamically, Only shows in views',
+  `date_updated` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+# Dump of table beneficiary_profile_medical_examination
+# ------------------------------------------------------------
+
+DROP TABLE IF EXISTS `beneficiary_profile_medical_examination`;
+
+CREATE TABLE `beneficiary_profile_medical_examination` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `doctor_mobile_number` varchar(17) NOT NULL DEFAULT '' COMMENT 'Optional, Textarea, Min:3, Max: 50',
+  `doctor_phone_number` varchar(17) NOT NULL DEFAULT '' COMMENT 'Optional, Textarea, Min:3, Max: 50',
+  `beneficiary_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
+  `beneficiary_profile_family_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
+  `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
+  `owner_organization_user_id` int(11) unsigned NOT NULL,
+  `date_added` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
+  `date_updated` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
+  PRIMARY KEY (`id`),
+  KEY `beneficiary_medical_examination_beneficiary_id` (`beneficiary_id`),
+  KEY `beneficiary_medical_examination_owner_organization_user_id` (`owner_organization_user_id`),
+  CONSTRAINT `beneficiary_medical_examination_ibfk_1` FOREIGN KEY (`beneficiary_id`) REFERENCES `beneficiary` (`id`),
+  CONSTRAINT `beneficiary_medical_examination_ibfk_2` FOREIGN KEY (`owner_organization_user_id`) REFERENCES `organization_user` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+# Dump of table beneficiary_profile_medical_examination_locale
+# ------------------------------------------------------------
+
+DROP TABLE IF EXISTS `beneficiary_profile_medical_examination_locale`;
+
+CREATE TABLE `beneficiary_profile_medical_examination_locale` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `doctor_name` varchar(255) NOT NULL DEFAULT '',
+  `doctor_address` varchar(1024) NOT NULL DEFAULT '' COMMENT 'Optional, Textarea, Min:3, Max: 50',
+  `complaint` mediumtext NOT NULL DEFAULT '',
+  `examination` mediumtext NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:3, Max: 50',
+  `treatment` mediumtext NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:3, Max: 50',
+  `lab_results` mediumtext NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:3, Max: 50',
+  `prescription` mediumtext NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:3, Max: 50',
+  `procedure` mediumtext NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:3, Max: 50',
+  `comment` mediumtext NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:3, Max: 50',
+  `locale_id` int(11) unsigned NOT NULL,
+  `beneficiary_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
+  `beneficiary_profile_family_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
+  `beneficiary_profile_medical_examination_id` int(11) unsigned NOT NULL COMMENT 'From Session',
+  `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
+  `owner_organization_user_id` int(11) unsigned NOT NULL,
+  `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP  COMMENT 'To be filled dynamically, Only shows in views',
   `date_updated` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -2018,11 +2432,11 @@ DROP TABLE IF EXISTS `beneficiary_profile_research_notes`;
 
 CREATE TABLE `beneficiary_profile_research_notes` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `support_type` enum('Frequent', 'Emergency', 'Medical', 'Educational', 'Other') NOT NULL DEFAULT 'Frequent' COMMENT 'Required, DropDownList',
-  `support_period` enum('Permanent', 'Once', 'Until healing', 'Until graduate') NOT NULL DEFAULT 'Permanent' COMMENT 'Required, DropDownList',
-  `expected_support_period` enum('Permanent', 'Once', 'Until healing', 'Until graduate') NOT NULL DEFAULT 'Permanent' COMMENT 'Required, DropDownList',
-  `support_modality` enum('Money', 'In-kind', 'Money and in-kind', 'Volunteer', 'By hand', 'Educate a family member', 'Employ a family member', 'Other') NOT NULL DEFAULT 'Money' COMMENT 'Required, DropDownList',
-  `information_source` enum('Official documents', 'Work visit', 'Home visit', 'Trusted neighbors') NOT NULL DEFAULT 'Official documents' COMMENT 'Required, DropDownList',
+  `support_type` enum('Frequent', 'Emergency', 'Medical', 'Educational', 'Other') NOT NULL DEFAULT 'Frequent',
+  `support_period` enum('Permanent', 'Once', 'Until healing', 'Until graduate') NOT NULL DEFAULT 'Permanent',
+  `expected_support_period` enum('Permanent', 'Once', 'Until healing', 'Until graduate') NOT NULL DEFAULT 'Permanent',
+  `support_modality` enum('Money', 'In-kind', 'Money and in-kind', 'Volunteer', 'By hand', 'Educate a family member', 'Employ a family member', 'Other') NOT NULL DEFAULT 'Money',
+  `information_source` enum('Official documents', 'Work visit', 'Home visit', 'Trusted neighbors') NOT NULL DEFAULT 'Official documents',
   `has_small_business_idea` enum('Yes', 'No') NOT NULL DEFAULT 'No' COMMENT 'Optional, DropDownList',
   `beneficiary_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
@@ -2045,8 +2459,8 @@ DROP TABLE IF EXISTS `beneficiary_profile_research_notes_locale`;
 CREATE TABLE `beneficiary_profile_research_notes_locale` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `small_business_idea_description` varchar(255) NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:3, Max: 100',
-  `researcher_recommendations` varchar(512) NOT NULL DEFAULT '' COMMENT 'Required, Textarea, Min:10, Max: 250',
-  `researcher_name` varchar(255) NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min:8, Max: 50',
+  `researcher_recommendations` varchar(512) NOT NULL DEFAULT '',
+  `researcher_name` varchar(255) NOT NULL DEFAULT '',
   `notes` varchar(512) NOT NULL DEFAULT '' COMMENT 'Optional, Textarea, Min:10, Max: 250',
   `committee_recommendations` varchar(512) NOT NULL DEFAULT '' COMMENT 'Optional, Textarea, Min:10, Max: 250',
   `committee_member_name` varchar(512) NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:8, Max: 50',
@@ -2065,192 +2479,6 @@ CREATE TABLE `beneficiary_profile_research_notes_locale` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
-# Dump of table beneficiary_profile_education_level
-# ------------------------------------------------------------
-
-DROP TABLE IF EXISTS `beneficiary_profile_education_level`;
-
-CREATE TABLE `beneficiary_profile_education_level` (
-  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `school_type` enum('Pre KG', 'KG', 'Elementary School', 'Intermediate School', 'High School', 'Industrial Education', 'Diploma', 'University', 'Academy') NOT NULL DEFAULT 'Diploma' COMMENT 'Required, DropDownList',
-  `start_at` date NOT NULL COMMENT 'Optional, Calender',
-  `end_at` date NOT NULL COMMENT 'Optional, Calender',
-  `beneficiary_profile_family_id` int(11) unsigned NOT NULL COMMENT 'Required',
-  `beneficiary_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
-  `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
-  `owner_organization_user_id` int(11) unsigned NOT NULL,
-  `date_added` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
-  `date_updated` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
-  PRIMARY KEY (`id`),
-  KEY `beneficiary_profile_education_level_beneficiary_id` (`beneficiary_id`),
-  KEY `beneficiary_profile_education_level_owner_organization_user_id` (`owner_organization_user_id`),
-  CONSTRAINT `beneficiary_profile_education_level_ibfk_1` FOREIGN KEY (`beneficiary_id`) REFERENCES `beneficiary` (`id`),
-  CONSTRAINT `beneficiary_profile_education_level_ibfk_2` FOREIGN KEY (`owner_organization_user_id`) REFERENCES `organization_user` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-
-# Dump of table beneficiary_profile_education_level_locale
-# ------------------------------------------------------------
-
-DROP TABLE IF EXISTS `beneficiary_profile_education_level_locale`;
-
-CREATE TABLE `beneficiary_profile_education_level_locale` (
-  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `school_name` varchar(255) NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min:3, Max: 50',
-  `level` varchar(255) NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min:3, Max: 50',
-  `major_name` varchar(255) NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:3, Max: 50',
-  `class_name` varchar(255) NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:3, Max: 50',
-  `address` varchar(255) NOT NULL DEFAULT '' COMMENT 'Optional, Textarea, Min:3, Max: 50',
-  `beneficiary_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
-  `beneficiary_profile_education_level_id` int(11) unsigned NOT NULL COMMENT 'Required',
-  `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
-  `owner_organization_user_id` int(11) unsigned NOT NULL,
-  `date_added` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
-  `date_updated` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
-  PRIMARY KEY (`id`),
-  KEY `beneficiary_education_level_locale_beneficiary_id` (`beneficiary_id`),
-  KEY `beneficiary_education_level_locale_owner_organization_user_id` (`owner_organization_user_id`),
-  CONSTRAINT `beneficiary_education_level_locale_ibfk_1` FOREIGN KEY (`beneficiary_id`) REFERENCES `beneficiary` (`id`),
-  CONSTRAINT `beneficiary_education_level_locale_ibfk_2` FOREIGN KEY (`owner_organization_user_id`) REFERENCES `organization_user` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-
-# Dump of table beneficiary_profile_teacher
-# ------------------------------------------------------------
-
-DROP TABLE IF EXISTS `beneficiary_profile_teacher`;
-
-CREATE TABLE `beneficiary_profile_teacher` (
-  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `school_type` enum('High School', 'Diploma', 'University') NOT NULL DEFAULT 'University' COMMENT 'Required, DropDownList',
-  `beneficiary_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
-  `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
-  `owner_organization_user_id` int(11) unsigned NOT NULL,
-  `date_added` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
-  `date_updated` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
-  PRIMARY KEY (`id`),
-  KEY `beneficiary_profile_teacher_beneficiary_id` (`beneficiary_id`),
-  KEY `beneficiary_profile_teacher_owner_organization_user_id` (`owner_organization_user_id`),
-  CONSTRAINT `beneficiary_profile_teacher_ibfk_1` FOREIGN KEY (`beneficiary_id`) REFERENCES `beneficiary` (`id`),
-  CONSTRAINT `beneficiary_profile_teacher_ibfk_2` FOREIGN KEY (`owner_organization_user_id`) REFERENCES `organization_user` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-
-# Dump of table beneficiary_profile_teacher_locale
-# ------------------------------------------------------------
-
-DROP TABLE IF EXISTS `beneficiary_profile_teacher_locale`;
-
-CREATE TABLE `beneficiary_profile_teacher_locale` (
-  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `school_name` varchar(255) NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min:3, Max: 50',
-  `level` varchar(255) NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min:3, Max: 50',
-  `major_name` varchar(255) NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:3, Max: 50',
-  `address` varchar(255) NOT NULL DEFAULT '' COMMENT 'Optional, Textarea, Min:3, Max: 50',
-  `locale_id` int(11) unsigned NOT NULL,
-  `beneficiary_id` int(11) unsigned NOT NULL COMMENT 'From Session',
-  `beneficiary_profile_teacher_id` int(11) unsigned NOT NULL COMMENT 'From Session',
-  `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
-  `owner_organization_user_id` int(11) unsigned NOT NULL,
-  `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP  COMMENT 'To be filled dynamically, Only shows in views',
-  `date_updated` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-
-# Dump of table beneficiary_profile_medical
-# ------------------------------------------------------------
-
-DROP TABLE IF EXISTS `beneficiary_profile_medical`;
-
-CREATE TABLE `beneficiary_profile_medical` (
-  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `beneficiary_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
-  `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
-  `owner_organization_user_id` int(11) unsigned NOT NULL,
-  `date_added` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
-  `date_updated` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
-  PRIMARY KEY (`id`),
-  KEY `beneficiary_profile_medical_beneficiary_id` (`beneficiary_id`),
-  KEY `beneficiary_profile_medical_owner_organization_user_id` (`owner_organization_user_id`),
-  CONSTRAINT `beneficiary_profile_medical_ibfk_1` FOREIGN KEY (`beneficiary_id`) REFERENCES `beneficiary` (`id`),
-  CONSTRAINT `beneficiary_profile_medical_ibfk_2` FOREIGN KEY (`owner_organization_user_id`) REFERENCES `organization_user` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-
-# Dump of table beneficiary_profile_medical_locale
-# ------------------------------------------------------------
-
-DROP TABLE IF EXISTS `beneficiary_profile_medical_locale`;
-
-CREATE TABLE `beneficiary_profile_medical_locale` (
-  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `medical_history` mediumtext NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:3, Max: 50',
-  `surgical_history` mediumtext NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:3, Max: 50',
-  `family_history` mediumtext NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:3, Max: 50',
-  `treatment_history` mediumtext NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:3, Max: 50',
-  `lab_results_history` mediumtext NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:3, Max: 50',
-  `prescription_history` mediumtext NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:3, Max: 50',
-  `locale_id` int(11) unsigned NOT NULL,
-  `beneficiary_id` int(11) unsigned NOT NULL COMMENT 'From Session',
-  `beneficiary_profile_medical_id` int(11) unsigned NOT NULL COMMENT 'From Session',
-  `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
-  `owner_organization_user_id` int(11) unsigned NOT NULL,
-  `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP  COMMENT 'To be filled dynamically, Only shows in views',
-  `date_updated` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-
-# Dump of table beneficiary_profile_medical_examination
-# ------------------------------------------------------------
-
-DROP TABLE IF EXISTS `beneficiary_profile_medical_examination`;
-
-CREATE TABLE `beneficiary_profile_medical_examination` (
-  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `doctor_mobile_number` varchar(17) NOT NULL DEFAULT '' COMMENT 'Optional, Textarea, Min:3, Max: 50',
-  `doctor_phone_number` varchar(17) NOT NULL DEFAULT '' COMMENT 'Optional, Textarea, Min:3, Max: 50',
-  `beneficiary_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
-  `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
-  `owner_organization_user_id` int(11) unsigned NOT NULL,
-  `date_added` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
-  `date_updated` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
-  PRIMARY KEY (`id`),
-  KEY `beneficiary_medical_examination_beneficiary_id` (`beneficiary_id`),
-  KEY `beneficiary_medical_examination_owner_organization_user_id` (`owner_organization_user_id`),
-  CONSTRAINT `beneficiary_medical_examination_ibfk_1` FOREIGN KEY (`beneficiary_id`) REFERENCES `beneficiary` (`id`),
-  CONSTRAINT `beneficiary_medical_examination_ibfk_2` FOREIGN KEY (`owner_organization_user_id`) REFERENCES `organization_user` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-
-# Dump of table beneficiary_profile_medical_examination_locale
-# ------------------------------------------------------------
-
-DROP TABLE IF EXISTS `beneficiary_profile_medical_examination_locale`;
-
-CREATE TABLE `beneficiary_profile_medical_examination_locale` (
-  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `doctor_name` varchar(255) NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min:3, Max: 50',
-  `doctor_address` varchar(1024) NOT NULL DEFAULT '' COMMENT 'Optional, Textarea, Min:3, Max: 50',
-  `complaint` mediumtext NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min:3, Max: 50',
-  `examination` mediumtext NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:3, Max: 50',
-  `treatment` mediumtext NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:3, Max: 50',
-  `lab_results` mediumtext NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:3, Max: 50',
-  `prescription` mediumtext NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:3, Max: 50',
-  `procedure` mediumtext NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:3, Max: 50',
-  `comment` mediumtext NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:3, Max: 50',
-  `locale_id` int(11) unsigned NOT NULL,
-  `beneficiary_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
-  `beneficiary_profile_medical_examination_id` int(11) unsigned NOT NULL COMMENT 'From Session',
-  `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
-  `owner_organization_user_id` int(11) unsigned NOT NULL,
-  `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP  COMMENT 'To be filled dynamically, Only shows in views',
-  `date_updated` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-
 # Dump of table beneficiary_media_gallery
 # ------------------------------------------------------------
 
@@ -2261,12 +2489,13 @@ CREATE TABLE `beneficiary_media_gallery` (
   `size` int(11) unsigned NOT NULL,
   `mime_type` varchar(32) NOT NULL,
   `path` varchar(1024) NOT NULL DEFAULT '',
-  `media_type_id` tinyint(3) unsigned DEFAULT '0' COMMENT 'Required: Text Field, Min:0, Max:255',
-  `media_filetype_id` tinyint(3) unsigned DEFAULT '0' COMMENT 'Required: Text Field, Min:0, Max:255',
+  `media_type_id` tinyint(3) unsigned DEFAULT '0',
+  `media_filetype_id` tinyint(3) unsigned DEFAULT '0',
   `published` enum('Yes', 'No') NOT NULL DEFAULT 'No',
-  `media_status_id` tinyint(3) unsigned DEFAULT '0' COMMENT 'Required: Text Field, Min:0, Max:255',
+  `media_status_id` tinyint(3) unsigned DEFAULT '0',
   `sequence` int(11) unsigned NOT NULL DEFAULT '0',
-  `beneficiary_id` int(11) unsigned NOT NULL COMMENT 'FROM Session'
+  `beneficiary_profile_family_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
+  `beneficiary_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_user_id` int(11) unsigned NOT NULL,
   `date_added` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
@@ -2304,8 +2533,9 @@ CREATE TABLE `beneficiary_media_youtube_gallery` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `youtube_link` varchar(255) NOT NULL,
   `published` enum('Yes', 'No') NOT NULL DEFAULT 'No',
-  `media_status_id` tinyint(3) unsigned DEFAULT '0' COMMENT 'Required: Text Field, Min:0, Max:255',
+  `media_status_id` tinyint(3) unsigned DEFAULT '0',
   `sequence` int(11) unsigned NOT NULL DEFAULT '0',
+  `beneficiary_profile_family_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `beneficiary_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_user_id` int(11) unsigned NOT NULL,
@@ -2348,8 +2578,8 @@ DROP TABLE IF EXISTS `organization`;
 
 CREATE TABLE `organization` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `organization_type_id` int(11) unsigned NOT NULL COMMENT 'Required, DropDownList',
-  `status` enum('Draft', 'Approved', 'In Review', 'Duplicate', 'Deleted') NOT NULL DEFAULT 'Draft' COMMENT 'Required, DropDownList',
+  `organization_type_id` int(11) unsigned NOT NULL,
+  `status` enum('Draft', 'Approved', 'In Review', 'Duplicate', 'Deleted') NOT NULL DEFAULT 'Draft',
   `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_user_id` int(11) unsigned NOT NULL,
   `date_added` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
@@ -2369,7 +2599,7 @@ DROP TABLE IF EXISTS `organization_locale`;
 
 CREATE TABLE `organization_locale` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) DEFAULT NULL COMMENT 'Required, Text Field, Min:3, Max:100',
+  `name` varchar(255) DEFAULT NULL,
   `description` mediumtext NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:0, Max: 2048',
   `logo` varchar(1024) NOT NULL DEFAULT '',
   `locale_id` int(11) unsigned NOT NULL,
@@ -2390,7 +2620,7 @@ DROP TABLE IF EXISTS `organization_has_flag`;
 CREATE TABLE `organization_has_flag` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `organization_flag_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
-  `flag_value` enum('Yes', 'No') NOT NULL DEFAULT 'Yes' COMMENT 'Required, DropDownList',
+  `flag_value` enum('Yes', 'No') NOT NULL DEFAULT 'Yes',
   `organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_user_id` int(11) unsigned NOT NULL,
@@ -2420,7 +2650,7 @@ DROP TABLE IF EXISTS `organization_flag`;
 
 CREATE TABLE `organization_flag` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `published` enum('Yes', 'No') COLLATE utf8_bin NOT NULL DEFAULT 'Yes' COMMENT 'Required, DropDownList',
+  `published` enum('Yes', 'No') COLLATE utf8_bin NOT NULL DEFAULT 'Yes',
   `country_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_user_id` int(11) unsigned NOT NULL,
@@ -2441,7 +2671,7 @@ DROP TABLE IF EXISTS `organization_flag_locale`;
 
 CREATE TABLE `organization_flag_locale` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `flag_name` varchar(255) NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min:3, Max: 50',
+  `flag_name` varchar(255) NOT NULL DEFAULT '',
   `locale_id` int(11) unsigned NOT NULL,
   `organization_flag_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
@@ -2459,19 +2689,19 @@ DROP TABLE IF EXISTS `organization_branch`;
 
 CREATE TABLE `organization_branch` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `mobile_number` varchar(17) NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min:12, Max: 14',
+  `mobile_number` varchar(17) NOT NULL DEFAULT '',
   `mobile_number_2` varchar(17) NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:12, Max: 14',
-  `phone_number` varchar(17) NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min:12, Max: 14',
+  `phone_number` varchar(17) NOT NULL DEFAULT '',
   `fax` varchar(17) NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:12, Max: 14',
-  `country_id` int(11) unsigned NOT NULL COMMENT 'Required, DropDownList',
-  `city_id` int(11) unsigned NOT NULL COMMENT 'Required, DropDownList',
-  `manager_id` int(11) unsigned NOT NULL COMMENT 'Required, DropDownList',
-  `work_days` varchar(255) NOT NULL DEFAULT '' COMMENT 'Required, DropDownList',
-  `work_hours` varchar(255) NOT NULL DEFAULT '' COMMENT 'Required',
+  `country_id` int(11) unsigned NOT NULL,
+  `city_id` int(11) unsigned NOT NULL,
+  `manager_id` int(11) unsigned NOT NULL,
+  `work_days` varchar(255) NOT NULL DEFAULT '',
+  `work_hours` varchar(255) NOT NULL DEFAULT '',
   `break_hours` varchar(255) NOT NULL DEFAULT '' COMMENT 'Optional',
   `geo_location` varchar(1024) NOT NULL DEFAULT '' COMMENT 'Optional',
-  `is_main_branch` enum('Yes', 'No') NOT NULL DEFAULT 'No' COMMENT 'Required, DropDownList',
-  `published` enum('Yes', 'No') COLLATE utf8_bin NOT NULL DEFAULT 'Yes' COMMENT 'Required, DropDownList',
+  `is_main_branch` enum('Yes', 'No') NOT NULL DEFAULT 'No',
+  `published` enum('Yes', 'No') COLLATE utf8_bin NOT NULL DEFAULT 'Yes',
   `organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_user_id` int(11) unsigned NOT NULL,
@@ -2493,9 +2723,9 @@ DROP TABLE IF EXISTS `organization_branch_locale`;
 
 CREATE TABLE `organization_branch_locale` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min:3, Max: 50',
+  `name` varchar(255) NOT NULL DEFAULT '',
   `description` mediumtext NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:0, Max: 2048',
-  `address` varchar(255) NOT NULL DEFAULT '' COMMENT 'Required, Textarea, Min:3, Max: 50',
+  `address` varchar(255) NOT NULL DEFAULT '',
   `website` varchar(255) NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:5, Max:255',
   `locale_id` int(11) unsigned NOT NULL,
   `organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
@@ -2515,8 +2745,9 @@ DROP TABLE IF EXISTS `organization_branch_committee`;
 
 CREATE TABLE `organization_branch_committee` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `published` enum('Yes', 'No') COLLATE utf8_bin NOT NULL DEFAULT 'Yes' COMMENT 'Required, DropDownList',
+  `published` enum('Yes', 'No') COLLATE utf8_bin NOT NULL DEFAULT 'Yes',
   `organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
+  `organization_user_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `organization_branch_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_user_id` int(11) unsigned NOT NULL,  `date_added` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
@@ -2537,7 +2768,7 @@ DROP TABLE IF EXISTS `organization_branch_committee_locale`;
 
 CREATE TABLE `organization_branch_committee_locale` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min:3, Max: 100',
+  `name` varchar(255) NOT NULL DEFAULT '',
   `description` mediumtext NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:0, Max: 2048',
   `agenda` varchar(1024) NOT NULL DEFAULT '' COMMENT 'Optional, Textarea, Min:10, Max: 500',
   `annual_plan` varchar(1024) NOT NULL DEFAULT '' COMMENT 'Optional, Textarea, Min:10, Max: 500',
@@ -2560,9 +2791,9 @@ CREATE TABLE `organization_branch_committee_user` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `organization_user_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
-  `organization_user_position_id` int(11) unsigned NOT NULL COMMENT 'Required, DropDownList',
-  `organization_branch_id` int(11) unsigned NOT NULL COMMENT 'Required, DropDownList',
-  `organization_branch_committee_id` int(11) unsigned NOT NULL COMMENT 'Required, DropDownList',
+  `organization_user_position_id` int(11) unsigned NOT NULL,
+  `organization_branch_id` int(11) unsigned NOT NULL,
+  `organization_branch_committee_id` int(11) unsigned NOT NULL,
   `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_user_id` int(11) unsigned NOT NULL,
   `date_added` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
@@ -2602,10 +2833,10 @@ DROP TABLE IF EXISTS `organization_user_position_locale`;
 
 CREATE TABLE `organization_user_position_locale` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `title` varchar(255) NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min:3, Max: 100',
+  `title` varchar(255) NOT NULL DEFAULT '',
   `description` mediumtext NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:0, Max: 2048',
   `qualifications` varchar(255) NOT NULL DEFAULT '' COMMENT 'Optional, Textarea, Min:3, Max: 100',
-  `responsibilities` varchar(255) NOT NULL DEFAULT '' COMMENT 'Required, Textarea, Min:3, Max: 100',
+  `responsibilities` varchar(255) NOT NULL DEFAULT '',
   `locale_id` int(11) unsigned NOT NULL,
   `organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `organization_user_position_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
@@ -2624,7 +2855,7 @@ DROP TABLE IF EXISTS `organization_type`;
 
 CREATE TABLE `organization_type` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `published` enum('Yes', 'No') COLLATE utf8_bin NOT NULL DEFAULT 'Yes' COMMENT 'Required, DropDownList',
+  `published` enum('Yes', 'No') COLLATE utf8_bin NOT NULL DEFAULT 'Yes',
   `country_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_user_id` int(11) unsigned NOT NULL,
@@ -2641,7 +2872,7 @@ DROP TABLE IF EXISTS `organization_type_locale`;
 
 CREATE TABLE `organization_type_locale` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) DEFAULT NULL COMMENT 'Required, Text Field, Min:3, Max:100',
+  `name` varchar(255) DEFAULT NULL,
   `description` mediumtext NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:0, Max: 2048',
   `locale_id` int(11) unsigned NOT NULL,
   `organization_user_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
@@ -2659,15 +2890,15 @@ DROP TABLE IF EXISTS `organization_user`;
 
 CREATE TABLE `organization_user` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `ssn` varchar(32) NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min:9, Max: 12',
-  `title` enum('Mr.', 'Mrs.', 'Miss', 'Ms.') NOT NULL DEFAULT 'Mr.' COMMENT 'Required, DropDownList',
-  `gender` enum('Male', 'Female') NOT NULL DEFAULT 'Male' COMMENT 'Required, DropDownList',
-  `email` varchar(255) NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min:3, Max:254',
-  `date_of_birth` date NOT NULL COMMENT 'Required, Calender',
-  `mobile_number` varchar(17) NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min:12, Max: 14',
+  `ssn` varchar(32) NOT NULL DEFAULT '',
+  `title` enum('Mr.', 'Mrs.', 'Miss', 'Ms.') NOT NULL DEFAULT 'Mr.',
+  `gender` enum('Male', 'Female') NOT NULL DEFAULT 'Male',
+  `email` varchar(255) NOT NULL DEFAULT '',
+  `date_of_birth` date NOT NULL,
+  `mobile_number` varchar(17) NOT NULL DEFAULT '',
   `mobile_number_2` varchar(17) NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:12, Max: 14',
   `phone_number` varchar(17) NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:12, Max: 14',
-  `nationality_id` int(11) unsigned NOT NULL COMMENT 'Required, DropDownList',
+  `nationality_id` int(11) unsigned NOT NULL,
   `avatar` varchar(1024) NOT NULL DEFAULT '',
   `organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `organization_branch_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
@@ -2693,11 +2924,11 @@ DROP TABLE IF EXISTS `organization_user_locale`;
 
 CREATE TABLE `organization_user_locale` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `first_name` varchar(255) NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min:3, Max: 50',
-  `second_name` varchar(255) NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min:3, Max: 50',
-  `third_name` varchar(255) NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min:3, Max: 50',
-  `last_name` varchar(255) NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min:3, Max: 50',
-  `address` varchar(255) NOT NULL DEFAULT '' COMMENT 'Required, Textarea, Min:3, Max: 50',
+  `first_name` varchar(255) NOT NULL DEFAULT '',
+  `second_name` varchar(255) NOT NULL DEFAULT '',
+  `third_name` varchar(255) NOT NULL DEFAULT '',
+  `last_name` varchar(255) NOT NULL DEFAULT '',
+  `address` varchar(255) NOT NULL DEFAULT '',
   `locale_id` int(11) unsigned NOT NULL,
   `organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `organization_user_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
@@ -2716,14 +2947,14 @@ DROP TABLE IF EXISTS `organization_asset`;
 
 CREATE TABLE `organization_asset` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `asset_id` int(11) unsigned NOT NULL COMMENT 'Required, Drop Down',
+  `asset_id` int(11) unsigned NOT NULL,
   `asset_type_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `asset_unit_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `cost` float unsigned NOT NULL COMMENT 'Optional, Text Field, Min:0.1',
   `tax_value` float unsigned NOT NULL COMMENT 'Optional, Text Field, Min:0.1',
-  `tax_type` enum('Fixed', 'Percent', 'None') NOT NULL DEFAULT 'None' COMMENT 'Required, DropDownList',
+  `tax_type` enum('Fixed', 'Percent', 'None') NOT NULL DEFAULT 'None',
   `currency` varchar(3) COLLATE utf8_bin NOT NULL DEFAULT 'USD',
-  `currency_exchange_rate_id` int(11) unsigned NOT NULL COMMENT 'Required, DropDownList',
+  `currency_exchange_rate_id` int(11) unsigned NOT NULL,
   `organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `organization_branch_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `status` enum('Active', 'Inactive') DEFAULT 'Active',
@@ -2744,7 +2975,7 @@ DROP TABLE IF EXISTS `organization_asset_liability`;
 
 CREATE TABLE `organization_asset_liability` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `organization_asset_id` int(11) unsigned NOT NULL COMMENT 'Required, Drop Down',
+  `organization_asset_id` int(11) unsigned NOT NULL,
   `asset_type_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `asset_unit_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `quantity` float unsigned NOT NULL COMMENT 'Optional, Text Field, Min:0.1',
@@ -2752,14 +2983,15 @@ CREATE TABLE `organization_asset_liability` (
   `cost` float unsigned NOT NULL COMMENT 'Optional, Text Field, Min:0.1',
   `total_value` float unsigned NOT NULL COMMENT 'Optional, Text Field, Min:0.1',
   `tax_value` float unsigned NOT NULL COMMENT 'Optional, Text Field, Min:0.1',
-  `tax_type` enum('Fixed', 'Percent', 'None') NOT NULL DEFAULT 'None' COMMENT 'Required, DropDownList',
+  `tax_type` enum('Fixed', 'Percent', 'None') NOT NULL DEFAULT 'None',
   `currency` varchar(3) COLLATE utf8_bin NOT NULL DEFAULT 'USD',
-  `currency_exchange_rate_id` int(11) unsigned NOT NULL COMMENT 'Required, DropDownList',
+  `currency_exchange_rate_id` int(11) unsigned NOT NULL,
+  `receipt_number` varchar(50) DEFAULT NULL,
   `date_expire` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
   `sku` varchar(255) DEFAULT NULL COMMENT 'FROM Session',
   `serial` varchar(255) DEFAULT NULL COMMENT 'FROM Session',
-  `asset_condition_id` int(11) unsigned NOT NULL COMMENT 'Required, DropDownList',
-  `organization_asset_location_id` int(11) unsigned NOT NULL COMMENT 'Required, DropDownList',
+  `asset_condition_id` int(11) unsigned NOT NULL,
+  `organization_asset_location_id` int(11) unsigned NOT NULL,
   `donor_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `organization_branch_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
@@ -2781,7 +3013,7 @@ DROP TABLE IF EXISTS `organization_asset_location`;
 CREATE TABLE `organization_asset_location` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `geo_location` varchar(1024) NOT NULL DEFAULT '' COMMENT 'Optional',
-  `published` enum('Yes', 'No') COLLATE utf8_bin NOT NULL DEFAULT 'Yes' COMMENT 'Required, DropDownList',
+  `published` enum('Yes', 'No') COLLATE utf8_bin NOT NULL DEFAULT 'Yes',
   `organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `organization_branch_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
@@ -2799,7 +3031,7 @@ DROP TABLE IF EXISTS `organization_asset_location_locale`;
 
 CREATE TABLE `organization_asset_location_locale` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) DEFAULT NULL COMMENT 'Required, Text Field, Min:3, Max:100',
+  `name` varchar(255) DEFAULT NULL,
   `description` mediumtext NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:0, Max: 2048',
   `locale_id` int(11) unsigned NOT NULL,
   `organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
@@ -2820,12 +3052,13 @@ DROP TABLE IF EXISTS `organization_asset_received`;
 
 CREATE TABLE `organization_asset_received` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `organization_asset_id` int(11) unsigned NOT NULL COMMENT 'Required, Drop Down',
+  `organization_asset_id` int(11) unsigned NOT NULL,
   `asset_type_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `asset_unit_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `asset_quantity` float unsigned NOT NULL COMMENT 'Optional, Text Field, Min:0.1',
-  `asset_condition_id` int(11) unsigned NOT NULL COMMENT 'Required, DropDownList',
+  `asset_condition_id` int(11) unsigned NOT NULL,
   `asset_value` float unsigned NOT NULL COMMENT 'Optional, Text Field, Min:0.1',
+  `receipt_number` varchar(50) DEFAULT NULL,
   `donor_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `organization_user_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
@@ -2847,12 +3080,12 @@ DROP TABLE IF EXISTS `organization_asset_required`;
 
 CREATE TABLE `organization_asset_required` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `organization_asset_id` int(11) unsigned NOT NULL COMMENT 'Required, Drop Down',
+  `organization_asset_id` int(11) unsigned NOT NULL,
   `asset_type_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `asset_unit_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
-  `asset_condition_id` int(11) unsigned NOT NULL COMMENT 'Required, DropDownList',
+  `asset_condition_id` int(11) unsigned NOT NULL,
   `asset_quantity` float unsigned NOT NULL COMMENT 'Optional, Text Field, Min:0.1',
-  `status` enum('Waiting', 'Received') DEFAULT 'Waiting',
+  `status` enum('Pending', 'Received') DEFAULT 'Pending',
   `organization_asset_received_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `organization_asset_received_date` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
   `organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
@@ -2877,10 +3110,10 @@ CREATE TABLE `organization_media_gallery` (
   `size` int(11) unsigned NOT NULL,
   `mime_type` varchar(32) NOT NULL,
   `path` varchar(1024) NOT NULL DEFAULT '',
-  `media_type_id` tinyint(3) unsigned DEFAULT '0' COMMENT 'Required: Text Field, Min:0, Max:255',
-  `media_filetype_id` tinyint(3) unsigned DEFAULT '0' COMMENT 'Required: Text Field, Min:0, Max:255',
+  `media_type_id` tinyint(3) unsigned DEFAULT '0',
+  `media_filetype_id` tinyint(3) unsigned DEFAULT '0',
   `published` enum('Yes', 'No') NOT NULL DEFAULT 'No',
-  `media_status_id` tinyint(3) unsigned DEFAULT '0' COMMENT 'Required: Text Field, Min:0, Max:255',
+  `media_status_id` tinyint(3) unsigned DEFAULT '0',
   `sequence` int(11) unsigned NOT NULL DEFAULT '0',
   `organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `organization_user_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
@@ -2922,7 +3155,7 @@ CREATE TABLE `organization_media_youtube_gallery` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `youtube_link` varchar(255) NOT NULL,
   `published` enum('Yes', 'No') NOT NULL DEFAULT 'No',
-  `media_status_id` tinyint(3) unsigned DEFAULT '0' COMMENT 'Required: Text Field, Min:0, Max:255',
+  `media_status_id` tinyint(3) unsigned DEFAULT '0',
   `sequence` int(11) unsigned NOT NULL DEFAULT '0',
   `organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `organization_user_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
@@ -2962,10 +3195,10 @@ DROP TABLE IF EXISTS `organization_task`;
 
 CREATE TABLE `organization_task` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `assignee_id` int(11) unsigned NOT NULL COMMENT 'Required, DropDownList',
-  `status` enum('Draft', 'Accepted', 'In Progress', 'Completed', 'Canceled') NOT NULL DEFAULT 'Draft' COMMENT 'Required, DropDownList',
-  `start_at` datetime DEFAULT NULL COMMENT 'Required, Calender',
-  `end_at` datetime DEFAULT NULL COMMENT 'Required, Calender',
+  `assignee_id` int(11) unsigned NOT NULL,
+  `status` enum('Draft', 'Accepted', 'In Progress', 'Completed', 'Canceled') NOT NULL DEFAULT 'Draft',
+  `start_at` datetime DEFAULT NULL,
+  `end_at` datetime DEFAULT NULL,
   `organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `organization_user_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `organization_branch_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
@@ -2992,7 +3225,7 @@ DROP TABLE IF EXISTS `organization_task_locale`;
 
 CREATE TABLE `organization_task_locale` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) DEFAULT NULL COMMENT 'Required, Text Field, Min:3, Max:100',
+  `name` varchar(255) DEFAULT NULL,
   `description` mediumtext NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:0, Max: 2048',
   `locale_id` int(11) unsigned NOT NULL,
   `organization_task_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
@@ -3081,7 +3314,7 @@ CREATE TABLE `post_type` (
   `post_category_id` int(11) unsigned NOT NULL,
   `parent_id` int(11) unsigned NOT NULL,
   `sequence` int(11) unsigned NOT NULL DEFAULT '0',
-  `published` enum('Yes', 'No') COLLATE utf8_bin NOT NULL DEFAULT 'Yes' COMMENT 'Required, DropDownList',
+  `published` enum('Yes', 'No') COLLATE utf8_bin NOT NULL DEFAULT 'Yes',
   `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_user_id` int(11) unsigned NOT NULL,  `date_added` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
   `date_updated` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
@@ -3170,12 +3403,12 @@ CREATE TABLE `post_media_gallery` (
   `size` int(11) unsigned NOT NULL,
   `mime_type` varchar(32) NOT NULL,
   `path` varchar(1024) NOT NULL DEFAULT '',
-  `media_type_id` tinyint(3) unsigned DEFAULT '0' COMMENT 'Required: Text Field, Min:0, Max:255',
-  `media_filetype_id` tinyint(3) unsigned DEFAULT '0' COMMENT 'Required: Text Field, Min:0, Max:255',
+  `media_type_id` tinyint(3) unsigned DEFAULT '0',
+  `media_filetype_id` tinyint(3) unsigned DEFAULT '0',
   `published` enum('Yes', 'No') NOT NULL DEFAULT 'No',
-  `media_status_id` tinyint(3) unsigned DEFAULT '0' COMMENT 'Required: Text Field, Min:0, Max:255',
+  `media_status_id` tinyint(3) unsigned DEFAULT '0',
   `sequence` int(11) unsigned NOT NULL DEFAULT '0',
-  `post_id` int(11) unsigned NOT NULL COMMENT 'Required',
+  `post_id` int(11) unsigned NOT NULL,
   `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_user_id` int(11) unsigned NOT NULL,
   `owner_organization_branch_id` int(11) unsigned NOT NULL,
@@ -3213,9 +3446,9 @@ CREATE TABLE `post_media_youtube_gallery` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `youtube_link` varchar(255) NOT NULL,
   `published` enum('Yes', 'No') NOT NULL DEFAULT 'No',
-  `media_status_id` tinyint(3) unsigned DEFAULT '0' COMMENT 'Required: Text Field, Min:0, Max:255',
+  `media_status_id` tinyint(3) unsigned DEFAULT '0',
   `sequence` int(11) unsigned NOT NULL DEFAULT '0',
-  `post_id` int(11) unsigned NOT NULL COMMENT 'Required',
+  `post_id` int(11) unsigned NOT NULL,
   `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_user_id` int(11) unsigned NOT NULL,
   `owner_organization_branch_id` int(11) unsigned NOT NULL,
@@ -3254,7 +3487,7 @@ CREATE TABLE `post` (
   `sequence` int(11) unsigned NOT NULL,
   `post_author_id` int(11) unsigned NOT NULL,
   `post_category_id` int(11) unsigned NOT NULL DEFAULT '0',
-  `published` enum('Yes', 'No') COLLATE utf8_bin NOT NULL DEFAULT 'Yes' COMMENT 'Required, DropDownList',
+  `published` enum('Yes', 'No') COLLATE utf8_bin NOT NULL DEFAULT 'Yes',
   `status` enum('Draft', 'Active', 'Deleted') NOT NULL DEFAULT 'Draft',
   `guid` varchar(255) NOT NULL DEFAULT '' COMMENT 'Hashed UID',
   `post_type_id` int(11) unsigned NOT NULL DEFAULT '0',
@@ -3306,12 +3539,12 @@ DROP TABLE IF EXISTS `admin_authorization`;
 
 CREATE TABLE `admin_authorization` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Admin Authorization ID',
-  `username` varchar(32) NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min: 3, Max: 15',
-  `password` varchar(128) NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min:8, Max: 50',
-  `status` enum('On Hold', 'Active', 'Blocked', 'Deleted') NOT NULL DEFAULT 'On Hold' COMMENT 'Required, DropDownList',
+  `username` varchar(32) NOT NULL DEFAULT '',
+  `password` varchar(128) NOT NULL DEFAULT '',
+  `status` enum('On Hold', 'Active', 'Blocked', 'Deleted') NOT NULL DEFAULT 'On Hold',
   `admin_authorization_role_id` int(10) unsigned NOT NULL DEFAULT '0' COMMENT 'Role ID',
-  `last_login_date` datetime NOT NULL COMMENT 'Required when login',
-  `last_login_ip` varchar(15) NOT NULL DEFAULT '' COMMENT 'Required when login',
+  `last_login_date` datetime NOT NULL,
+  `last_login_ip` varchar(15) NOT NULL DEFAULT '',
   `organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `organization_user_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
@@ -3386,34 +3619,36 @@ CREATE TABLE `admin_authorization_rule` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Admin Rule Table';
 
 
-# Dump of table admin_authorization_organization_relation
+# Dump of table admin_authorization_relation
 # ------------------------------------------------------------
 
-DROP TABLE IF EXISTS `admin_authorization_organization_relation`;
+DROP TABLE IF EXISTS `admin_authorization_relation`;
 
-CREATE TABLE `admin_authorization_organization_relation` (
+CREATE TABLE `admin_authorization_relation` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `status` enum('Initatied', 'Established', 'Refused', 'Broken', 'Canceled') NOT NULL DEFAULT 'Initatied',
   `initiator_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `initiator_organization_user_id` int(11) unsigned NOT NULL,
   `target_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `target_organization_user_id` int(11) unsigned NOT NULL,
+  `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
+  `owner_organization_user_id` int(11) unsigned NOT NULL,
   `date_added` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
   `date_updated` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
   PRIMARY KEY (`id`),
-  KEY `admin_authorization_organization_relation_owner_organization_id` (`owner_organization_id`),
-  KEY `admin_authorization_organization_relation_owner_organization_user_id` (`owner_organization_user_id`),
-  CONSTRAINT `admin_authorization_organization_relation_ibfk_2` FOREIGN KEY (`owner_organization_id`) REFERENCES `organization` (`id`),
-  CONSTRAINT `admin_authorization_organization_relation_ibfk_3` FOREIGN KEY (`owner_organization_user_id`) REFERENCES `organization_user` (`id`)
+  KEY `admin_authorization_relation_owner_organization_id` (`owner_organization_id`),
+  KEY `admin_authorization_relation_owner_organization_user_id` (`owner_organization_user_id`),
+  CONSTRAINT `admin_authorization_relation_ibfk_2` FOREIGN KEY (`owner_organization_id`) REFERENCES `organization` (`id`),
+  CONSTRAINT `admin_authorization_relation_ibfk_3` FOREIGN KEY (`owner_organization_user_id`) REFERENCES `organization_user` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
-# Dump of table admin_authorization_organization_relation_role
+# Dump of table admin_authorization_relation_role
 # ------------------------------------------------------------
 
-DROP TABLE IF EXISTS `admin_authorization_organization_relation_role`;
+DROP TABLE IF EXISTS `admin_authorization_relation_role`;
 
-CREATE TABLE `admin_authorization_organization_relation_role` (
+CREATE TABLE `admin_authorization_relation_role` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `status` enum('Initatied', 'Established', 'Refused', 'Broken', 'Canceled') NOT NULL DEFAULT 'Initatied',
   `admin_authorization_role_id` int(10) unsigned NOT NULL DEFAULT '0' COMMENT 'Role ID',
@@ -3424,10 +3659,10 @@ CREATE TABLE `admin_authorization_organization_relation_role` (
   `date_added` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
   `date_updated` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
   PRIMARY KEY (`id`),
-  KEY `admin_authorization_organization_relation_role_owner_organization_id` (`owner_organization_id`),
-  KEY `admin_authorization_organization_relation_role_owner_organization_user_id` (`owner_organization_user_id`),
-  CONSTRAINT `admin_authorization_organization_relation_role_ibfk_2` FOREIGN KEY (`owner_organization_id`) REFERENCES `organization` (`id`),
-  CONSTRAINT `admin_authorization_organization_relation_role_ibfk_3` FOREIGN KEY (`owner_organization_user_id`) REFERENCES `organization_user` (`id`)
+  KEY `admin_authorization_relation_role_owner_organization_id` (`owner_organization_id`),
+  KEY `admin_authorization_relation_role_owner_organization_user_id` (`owner_organization_user_id`),
+  CONSTRAINT `admin_authorization_relation_role_ibfk_2` FOREIGN KEY (`owner_organization_id`) REFERENCES `organization` (`id`),
+  CONSTRAINT `admin_authorization_relation_role_ibfk_3` FOREIGN KEY (`owner_organization_user_id`) REFERENCES `organization_user` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
@@ -3446,8 +3681,8 @@ CREATE TABLE `admin_authorization_relation` (
   `admin_authorization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `admin_authorization_organization_relation_role_id` int(10) unsigned NOT NULL DEFAULT '0' COMMENT 'Role ID',
   `status` enum('Pending', 'Active', 'Blocked', 'Deleted') NOT NULL DEFAULT 'Pending',
-  `last_login_date` datetime NOT NULL COMMENT 'Required when login',
-  `last_login_ip` varchar(15) NOT NULL DEFAULT '' COMMENT 'Required when login',
+  `last_login_date` datetime NOT NULL,
+  `last_login_ip` varchar(15) NOT NULL DEFAULT '',
   `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_user_id` int(11) unsigned NOT NULL,
   `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Token creation timestamp',
@@ -3489,11 +3724,11 @@ DROP TABLE IF EXISTS `site_authorization`;
 
 CREATE TABLE `site_authorization` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Role ID',
-  `username` varchar(32) NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min: 3, Max: 15',
-  `password` varchar(128) NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min:8, Max: 50',
-  `status` enum('On Hold', 'Active', 'Blocked', 'Deleted') NOT NULL DEFAULT 'On Hold' COMMENT 'Required, DropDownList',
-  `last_login_date` datetime NOT NULL COMMENT 'Required when login',
-  `last_login_ip` varchar(15) NOT NULL DEFAULT '' COMMENT 'Required when login',
+  `username` varchar(32) NOT NULL DEFAULT '',
+  `password` varchar(128) NOT NULL DEFAULT '',
+  `status` enum('On Hold', 'Active', 'Blocked', 'Deleted') NOT NULL DEFAULT 'On Hold',
+  `last_login_date` datetime NOT NULL,
+  `last_login_ip` varchar(15) NOT NULL DEFAULT '',
   `user_type` enum('Donor', 'Beneficiary', 'Agent') NOT NULL COMMENT 'From session',
   `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_user_id` int(11) unsigned NOT NULL,
@@ -3536,7 +3771,7 @@ DROP TABLE IF EXISTS `homepage_slider`;
 CREATE TABLE `homepage_slider` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `sequence` int(11) unsigned NOT NULL DEFAULT '0',
-  `published` enum('Yes', 'No') COLLATE utf8_bin NOT NULL DEFAULT 'Yes' COMMENT 'Required, DropDownList',
+  `published` enum('Yes', 'No') COLLATE utf8_bin NOT NULL DEFAULT 'Yes',
   `animation_type_id` int(11) unsigned NOT NULL DEFAULT '0' COMMENT 'slide, fade, bars',
   `organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `organization_user_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
@@ -3580,17 +3815,17 @@ DROP TABLE IF EXISTS `donor`;
 CREATE TABLE `donor` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `sequence` int(11) unsigned NOT NULL,
-  `ssn` varchar(32) NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min:9, Max: 12',
-  `title` enum('Mr.', 'Mrs.', 'Miss', 'Ms.') NOT NULL DEFAULT 'Mr.' COMMENT 'Required, DropDownList',
-  `gender` enum('Male', 'Female') NOT NULL DEFAULT 'Male' COMMENT 'Required, DropDownList',
-  `email` varchar(255) NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min:3, Max:254',
-  `date_of_birth` date NOT NULL COMMENT 'Required, Calender',
+  `ssn` varchar(32) NOT NULL DEFAULT '',
+  `title` enum('Mr.', 'Mrs.', 'Miss', 'Ms.') NOT NULL DEFAULT 'Mr.',
+  `gender` enum('Male', 'Female') NOT NULL DEFAULT 'Male',
+  `email` varchar(255) NOT NULL DEFAULT '',
+  `date_of_birth` date NOT NULL,
   `phone_number` varchar(17) NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:12, Max: 14',
-  `mobile_number` varchar(17) NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min:12, Max: 14',
+  `mobile_number` varchar(17) NOT NULL DEFAULT '',
   `mobile_number_2` varchar(17) NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:12, Max: 14',
   `avatar` varchar(1024) NOT NULL DEFAULT '',
   `visibility` enum('Anonymous', 'Visible') NOT NULL DEFAULT 'Visible',
-  `nationality_id` int(11) unsigned NOT NULL COMMENT 'Required, DropDownList',
+  `nationality_id` int(11) unsigned NOT NULL,
   `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_user_id` int(11) unsigned NOT NULL,
   `date_added` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
@@ -3610,11 +3845,11 @@ DROP TABLE IF EXISTS `donor_locale`;
 
 CREATE TABLE `donor_locale` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `first_name` varchar(255) NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min:3, Max: 50',
-  `second_name` varchar(255) NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min:3, Max: 50',
-  `third_name` varchar(255) NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min:3, Max: 50',
-  `last_name` varchar(255) NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min:3, Max: 50',
-  `address` varchar(255) NOT NULL DEFAULT '' COMMENT 'Required, Textarea, Min:3, Max: 50',
+  `first_name` varchar(255) NOT NULL DEFAULT '',
+  `second_name` varchar(255) NOT NULL DEFAULT '',
+  `third_name` varchar(255) NOT NULL DEFAULT '',
+  `last_name` varchar(255) NOT NULL DEFAULT '',
+  `address` varchar(255) NOT NULL DEFAULT '',
   `locale_id` int(11) unsigned NOT NULL,
   `donor_id` int(11) unsigned NOT NULL COMMENT 'From Session',
   `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
@@ -3640,23 +3875,23 @@ DROP TABLE IF EXISTS `agent`;
 CREATE TABLE `agent` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `sequence` int(11) unsigned NOT NULL,
-  `ssn` varchar(32) NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min:9, Max: 12',
-  `title` enum('Mr.', 'Mrs.', 'Miss', 'Ms.') NOT NULL DEFAULT 'Mr.' COMMENT 'Required, DropDownList',
-  `gender` enum('Male', 'Female') NOT NULL DEFAULT 'Male' COMMENT 'Required, DropDownList',
-  `email` varchar(255) NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min:3, Max:254',
-  `mobile_number` varchar(17) NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min:12, Max: 14',
+  `ssn` varchar(32) NOT NULL DEFAULT '',
+  `title` enum('Mr.', 'Mrs.', 'Miss', 'Ms.') NOT NULL DEFAULT 'Mr.',
+  `gender` enum('Male', 'Female') NOT NULL DEFAULT 'Male',
+  `email` varchar(255) NOT NULL DEFAULT '',
+  `mobile_number` varchar(17) NOT NULL DEFAULT '',
   `mobile_number_2` varchar(17) NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:12, Max: 14',
   `phone_number` varchar(17) NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:12, Max: 14',
   `fax` varchar(17) NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:12, Max: 14',
-  `country_id` int(11) unsigned NOT NULL COMMENT 'Required, DropDownList',
-  `city_id` int(11) unsigned NOT NULL COMMENT 'Required, DropDownList',
+  `country_id` int(11) unsigned NOT NULL,
+  `city_id` int(11) unsigned NOT NULL,
   `avatar` varchar(1024) NOT NULL DEFAULT '',
-  `bank_name` varchar(255) NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min:3, Max:100',
-  `bank_branch_name` varchar(255) NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min:3, Max:100',
-  `bank_branch_number` varchar(255) NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min:3, Max:100',
-  `bank_swift_code` varchar(32) NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min:1, Max:100',
-  `bank_account_number` varchar(255) NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min:3, Max:100',
-  `bank_iban_code` varchar(32) NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min:1, Max:100',
+  `bank_name` varchar(255) NOT NULL DEFAULT '',
+  `bank_branch_name` varchar(255) NOT NULL DEFAULT '',
+  `bank_branch_number` varchar(255) NOT NULL DEFAULT '',
+  `bank_swift_code` varchar(32) NOT NULL DEFAULT '',
+  `bank_account_number` varchar(255) NOT NULL DEFAULT '',
+  `bank_iban_code` varchar(32) NOT NULL DEFAULT '',
   `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_user_id` int(11) unsigned NOT NULL,
   `date_added` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
@@ -3677,12 +3912,12 @@ DROP TABLE IF EXISTS `agent_locale`;
 
 CREATE TABLE `agent_locale` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `first_name` varchar(255) NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min:3, Max: 50',
-  `second_name` varchar(255) NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min:3, Max: 50',
-  `third_name` varchar(255) NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min:3, Max: 50',
-  `last_name` varchar(255) NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min:3, Max: 50',
-  `company_name` varchar(255) NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min:3, Max: 50',
-  `address` varchar(255) NOT NULL DEFAULT '' COMMENT 'Required, Textarea, Min:3, Max: 50',
+  `first_name` varchar(255) NOT NULL DEFAULT '',
+  `second_name` varchar(255) NOT NULL DEFAULT '',
+  `third_name` varchar(255) NOT NULL DEFAULT '',
+  `last_name` varchar(255) NOT NULL DEFAULT '',
+  `company_name` varchar(255) NOT NULL DEFAULT '',
+  `address` varchar(255) NOT NULL DEFAULT '',
   `locale_id` int(11) unsigned NOT NULL,
   `agent_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
@@ -3707,15 +3942,15 @@ DROP TABLE IF EXISTS `message_inbox`;
 
 CREATE TABLE `message_inbox` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `message_type_id` int(11) unsigned NOT NULL COMMENT 'Required, DropDownList',
+  `message_type_id` int(11) unsigned NOT NULL,
   `number` varchar(255) NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:1, Max: 50',
-  `from_name` varchar(255) NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min:3, Max: 50',
-  `from_department` varchar(255) NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min:3, Max: 50',
-  `subject` varchar(255) NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min:3, Max: 100',
+  `from_name` varchar(255) NOT NULL DEFAULT '',
+  `from_department` varchar(255) NOT NULL DEFAULT '',
+  `subject` varchar(255) NOT NULL DEFAULT '',
   `received_at` datetime NOT NULL COMMENT 'Optional, Calender',
   `organization_user_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
-  `organization_branch_id` int(11) unsigned NOT NULL COMMENT 'Required, DropDownList contains all Branches for logged in Organization',
+  `organization_branch_id` int(11) unsigned NOT NULL,
   `date_added` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
   `date_updated` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
   PRIMARY KEY (`id`),
@@ -3737,21 +3972,21 @@ DROP TABLE IF EXISTS `message_outbox`;
 
 CREATE TABLE `message_outbox` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `message_type_id` int(11) unsigned NOT NULL COMMENT 'Required, DropDownList',
-  `message_template_id` int(11) unsigned NOT NULL COMMENT 'Required, DropDownList',
+  `message_type_id` int(11) unsigned NOT NULL,
+  `message_template_id` int(11) unsigned NOT NULL,
   `number` varchar(255) NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:1, Max: 50',
-  `from_mail` varchar(255) NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min:3, Max:254',
-  `from_name` varchar(255) NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min:3, Max: 50',
-  `from_department` varchar(255) NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min:3, Max: 50',
-  `to_mail` varchar(255) NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min:3, Max:254',
-  `to_name` varchar(255) NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min:3, Max: 50',
-  `to_department` varchar(255) NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min:3, Max: 50',
-  `subject` varchar(255) NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min:3, Max: 100',
+  `from_mail` varchar(255) NOT NULL DEFAULT '',
+  `from_name` varchar(255) NOT NULL DEFAULT '',
+  `from_department` varchar(255) NOT NULL DEFAULT '',
+  `to_mail` varchar(255) NOT NULL DEFAULT '',
+  `to_name` varchar(255) NOT NULL DEFAULT '',
+  `to_department` varchar(255) NOT NULL DEFAULT '',
+  `subject` varchar(255) NOT NULL DEFAULT '',
   `description` mediumtext NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:0, Max: 2048',
   `send_at` datetime NOT NULL COMMENT 'Optional, Calender',
   `organization_user_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
-  `organization_branch_id` int(11) unsigned NOT NULL COMMENT 'Required, DropDownList contains all Branches for logged in Organization',
+  `organization_branch_id` int(11) unsigned NOT NULL,
   `date_added` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
   `date_updated` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
   PRIMARY KEY (`id`),
@@ -3767,69 +4002,6 @@ CREATE TABLE `message_outbox` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
-
-# Dump of table message_template
-# ------------------------------------------------------------
-
-DROP TABLE IF EXISTS `message_template`;
-
-CREATE TABLE `message_template` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `message_type_id` int(11) unsigned NOT NULL COMMENT 'Required, DropDownList',
-  `number` varchar(255) NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:1, Max: 50',
-  `from_name` varchar(255) NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min:3, Max: 50',
-  `from_department` varchar(255) NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min:3, Max: 50',
-  `to_name` varchar(255) NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min:3, Max: 50',
-  `to_department` varchar(255) NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min:3, Max: 50',
-  `subject` varchar(255) NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min:3, Max: 100',
-  `description` mediumtext NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:0, Max: 2048',
-  `organization_user_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
-  `organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
-  `organization_branch_id` int(11) unsigned NOT NULL COMMENT 'Required, DropDownList contains all Branches for logged in Organization',
-  `date_added` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
-  `date_updated` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
-  PRIMARY KEY (`id`),
-  KEY `message_template_organization_id` (`organization_id`),
-  KEY `message_template_message_type_id` (`message_type_id`),
-  KEY `message_template_organization_user_id` (`organization_user_id`),
-  KEY `message_template_organization_branch_id` (`organization_branch_id`),
-  CONSTRAINT `message_template_ibfk_1` FOREIGN KEY (`organization_id`) REFERENCES `organization` (`id`),
-  CONSTRAINT `message_template_ibfk_2` FOREIGN KEY (`message_type_id`) REFERENCES `message_type` (`id`),
-  CONSTRAINT `message_template_ibfk_3` FOREIGN KEY (`organization_user_id`) REFERENCES `organization_user` (`id`),
-  CONSTRAINT `message_template_ibfk_4` FOREIGN KEY (`organization_branch_id`) REFERENCES `organization_branch` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-
-# Dump of table message_type
-# - SMS
-# - Mail
-# - Web Notification
-# - Push
-# - MMS
-# ------------------------------------------------------------
-
-DROP TABLE IF EXISTS `message_type`;
-
-CREATE TABLE `message_type` (
-  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `title` varchar(255) NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min:3, Max: 50',
-  `description` mediumtext NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:0, Max: 2048',
-  `published` enum('Yes', 'No') COLLATE utf8_bin NOT NULL DEFAULT 'Yes' COMMENT 'Required, DropDownList',
-  `organization_user_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
-  `organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
-  `organization_branch_id` int(11) unsigned NOT NULL COMMENT 'Required, DropDownList contains all Branches for logged in Organization',
-  `date_added` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
-  `date_updated` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
-  PRIMARY KEY (`id`),
-  KEY `message_type_organization_id` (`organization_id`),
-  KEY `message_type_organization_user_id` (`organization_user_id`),
-  KEY `message_type_organization_branch_id` (`organization_branch_id`),
-  CONSTRAINT `message_type_ibfk_1` FOREIGN KEY (`organization_id`) REFERENCES `organization` (`id`),
-  CONSTRAINT `message_type_ibfk_2` FOREIGN KEY (`organization_user_id`) REFERENCES `organization_user` (`id`),
-  CONSTRAINT `message_type_ibfk_3` FOREIGN KEY (`organization_branch_id`) REFERENCES `organization_branch` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-
 # Dump of table message_media_gallery
 # ------------------------------------------------------------
 
@@ -3842,12 +4014,12 @@ CREATE TABLE `message_media_gallery` (
   `size` int(11) unsigned NOT NULL,
   `mime_type` varchar(32) NOT NULL,
   `path` varchar(1024) NOT NULL DEFAULT '',
-  `media_type_id` tinyint(3) unsigned DEFAULT '0' COMMENT 'Required: Text Field, Min:0, Max:255',
-  `media_filetype_id` tinyint(3) unsigned DEFAULT '0' COMMENT 'Required: Text Field, Min:0, Max:255',
+  `media_type_id` tinyint(3) unsigned DEFAULT '0',
+  `media_filetype_id` tinyint(3) unsigned DEFAULT '0',
   `published` enum('Yes', 'No') NOT NULL DEFAULT 'No',
-  `media_status_id` tinyint(3) unsigned DEFAULT '0' COMMENT 'Required: Text Field, Min:0, Max:255',
+  `media_status_id` tinyint(3) unsigned DEFAULT '0',
   `sequence` int(11) unsigned NOT NULL DEFAULT '0',
-  `message_id` int(11) unsigned NOT NULL COMMENT 'Required',
+  `message_id` int(11) unsigned NOT NULL,
   `organization_user_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `date_added` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
   `date_updated` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
@@ -3866,9 +4038,9 @@ CREATE TABLE `message_media_youtube_gallery` (
   `alias` varchar(255) NOT NULL DEFAULT '',
   `intro_text` mediumtext NOT NULL DEFAULT '',
   `published` enum('Yes', 'No') NOT NULL DEFAULT 'No',
-  `media_status_id` tinyint(3) unsigned DEFAULT '0' COMMENT 'Required: Text Field, Min:0, Max:255',
+  `media_status_id` tinyint(3) unsigned DEFAULT '0',
   `sequence` int(11) unsigned NOT NULL DEFAULT '0',
-  `message_id` int(11) unsigned NOT NULL COMMENT 'Required',
+  `message_id` int(11) unsigned NOT NULL,
   `organization_user_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `date_added` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
   `date_updated` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
@@ -3918,7 +4090,7 @@ DROP TABLE IF EXISTS `project_category`;
 
 CREATE TABLE `project_category` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) DEFAULT NULL COMMENT 'Required, Text Field, Min:3, Max:100',
+  `name` varchar(255) DEFAULT NULL,
   `published` enum('Yes', 'No') NOT NULL DEFAULT 'No',
   `sequence` int(11) unsigned NOT NULL DEFAULT '0',
   `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
@@ -3954,7 +4126,7 @@ DROP TABLE IF EXISTS `project_type_locale`;
 
 CREATE TABLE `project_type_locale` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) DEFAULT NULL COMMENT 'Required, Text Field, Min:3, Max:100',
+  `name` varchar(255) DEFAULT NULL,
   `description` mediumtext NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:0, Max: 2048',
   `locale_id` int(11) unsigned NOT NULL,
   `project_type_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
@@ -3974,27 +4146,27 @@ DROP TABLE IF EXISTS `project`;
 CREATE TABLE `project` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `sequence` int(11) unsigned NOT NULL,
-  `country_id` int(11) unsigned NOT NULL COMMENT 'Required, DropDownList',
-  `city_id` int(11) unsigned NOT NULL COMMENT 'Required, DropDownList',
+  `country_id` int(11) unsigned NOT NULL,
+  `city_id` int(11) unsigned NOT NULL,
   `geo_location` varchar(1024) NOT NULL DEFAULT '' COMMENT 'Optional',
-  `project_type_id` int(11) unsigned NOT NULL COMMENT 'Required, DropDownList',
+  `project_type_id` int(11) unsigned NOT NULL,
   `planned_target` float unsigned NOT NULL DEFAULT '0' COMMENT 'Optional, Text Field, Min:1',
-  `planned_start_date` datetime NOT NULL COMMENT 'Required, Calender',
-  `planned_end_date` datetime NOT NULL COMMENT 'Required, Calender',
-  `planned_duration` tinyint(11) unsigned NOT NULL DEFAULT '1' COMMENT 'Required, Input Field, Min:0, Max: 100',
-  `duration_unit` enum('Minute', 'Hour', 'Day', 'Week', 'Month', 'Annual', 'NA') NOT NULL DEFAULT 'Day' COMMENT 'Required,',
-  `published` enum('Yes', 'No') NOT NULL DEFAULT 'No' COMMENT 'Required, DropDownList',
-  `status` enum('Draft', 'Active', 'Completed', 'Canceled') NOT NULL DEFAULT 'Draft' COMMENT 'Required, DropDownList',
-  `progress` tinyint(11) unsigned NOT NULL DEFAULT '0' COMMENT 'Required, Input Field, Min:0, Max: 100',
-  `progress_target` tinyint(11) unsigned NOT NULL DEFAULT '0' COMMENT 'Required, Input Field, Min:0, Max: 100',
+  `planned_start_date` datetime NOT NULL,
+  `planned_end_date` datetime NOT NULL,
+  `planned_duration` tinyint(11) unsigned NOT NULL DEFAULT '1',
+  `duration_unit` enum('Minute', 'Hour', 'Day', 'Week', 'Month', 'Annual', 'NA') NOT NULL DEFAULT 'Day',
+  `published` enum('Yes', 'No') NOT NULL DEFAULT 'No',
+  `status` enum('Draft', 'Active', 'Completed', 'Canceled') NOT NULL DEFAULT 'Draft',
+  `progress` tinyint(11) unsigned NOT NULL DEFAULT '0',
+  `progress_target` tinyint(11) unsigned NOT NULL DEFAULT '0',
   `currency` varchar(3) COLLATE utf8_bin NOT NULL DEFAULT 'USD',
-  `currency_exchange_rate_id` int(11) unsigned NOT NULL COMMENT 'Required, DropDownList',
-  `auto_start_project` enum('Yes', 'No') NOT NULL DEFAULT 'Yes' COMMENT 'Required, DropDownList',
-  `auto_finish_project` enum('Yes', 'No') NOT NULL DEFAULT 'Yes' COMMENT 'Required, DropDownList',
+  `currency_exchange_rate_id` int(11) unsigned NOT NULL,
+  `auto_start_project` enum('Yes', 'No') NOT NULL DEFAULT 'Yes',
+  `auto_finish_project` enum('Yes', 'No') NOT NULL DEFAULT 'Yes',
   `actual_target` float unsigned NOT NULL DEFAULT '0' COMMENT 'Optional, Text Field, Min:1',
-  `actual_start_date` datetime NOT NULL COMMENT 'Required, Calender',
-  `actual_end_date` datetime NOT NULL COMMENT 'Required, Calender',
-  `actual_duration` tinyint(11) unsigned NOT NULL DEFAULT '1' COMMENT 'Required, Input Field, Min:0, Max: 100',
+  `actual_start_date` datetime NOT NULL,
+  `actual_end_date` datetime NOT NULL,
+  `actual_duration` tinyint(11) unsigned NOT NULL DEFAULT '1',
   `organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `organization_branch_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_user_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
@@ -4044,9 +4216,9 @@ DROP TABLE IF EXISTS `project_donor`;
 CREATE TABLE `project_donor` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `project_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
-  `donor_id` int(11) unsigned NOT NULL COMMENT 'Required, DropDownList',
+  `donor_id` int(11) unsigned NOT NULL,
   `currency` varchar(3) COLLATE utf8_bin NOT NULL DEFAULT 'USD',
-  `currency_exchange_rate_id` int(11) unsigned NOT NULL COMMENT 'Required, DropDownList',
+  `currency_exchange_rate_id` int(11) unsigned NOT NULL,
   `amount` float unsigned NOT NULL COMMENT 'Optional, Text Field, Min:0.1',
   `status` enum('Active', 'Inactive') DEFAULT 'Active',
   `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
@@ -4068,8 +4240,8 @@ DROP TABLE IF EXISTS `project_event_activity`;
 
 CREATE TABLE `project_event_activity` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `sequence` tinyint(11) unsigned NOT NULL DEFAULT '1' COMMENT 'Required, Input Field, Min:0, Max: 1000',
-  `project_id` int(11) unsigned NOT NULL COMMENT 'Required, DropDownList',
+  `sequence` tinyint(11) unsigned NOT NULL DEFAULT '1',
+  `project_id` int(11) unsigned NOT NULL,
   `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_user_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `date_added` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
@@ -4087,7 +4259,7 @@ DROP TABLE IF EXISTS `project_event_activity_locale`;
 
 CREATE TABLE `project_event_activity_locale` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min:3, Max: 50',
+  `name` varchar(255) NOT NULL DEFAULT '',
   `description` mediumtext NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:0, Max: 2048',
   `locale_id` int(11) unsigned NOT NULL,
   `project_id` int(11) unsigned NOT NULL COMMENT 'From Session',
@@ -4107,7 +4279,7 @@ DROP TABLE IF EXISTS `project_event_comment`;
 
 CREATE TABLE `project_event_comment` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `project_id` int(11) unsigned NOT NULL COMMENT 'Required, DropDownList',
+  `project_id` int(11) unsigned NOT NULL,
   `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_user_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `date_added` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
@@ -4144,11 +4316,11 @@ DROP TABLE IF EXISTS `project_event_agenda`;
 
 CREATE TABLE `project_event_agenda` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `start_time` time NOT NULL DEFAULT '00:00:00' COMMENT 'Required, Calender',
-  `end_time` time NOT NULL DEFAULT '00:00:00' COMMENT 'Required, Calender',
-  `sequence` tinyint(11) unsigned NOT NULL DEFAULT '1' COMMENT 'Required, Input Field, Min:0, Max: 1000',
-  `day_number` tinyint(3) unsigned NOT NULL DEFAULT '1' COMMENT 'Required, Text Field, Min:1, Max:255',
-  `project_id` int(11) unsigned NOT NULL COMMENT 'Required, DropDownList',
+  `start_time` time NOT NULL DEFAULT '00:00:00',
+  `end_time` time NOT NULL DEFAULT '00:00:00',
+  `sequence` tinyint(11) unsigned NOT NULL DEFAULT '1',
+  `day_number` tinyint(3) unsigned NOT NULL DEFAULT '1',
+  `project_id` int(11) unsigned NOT NULL,
   `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_user_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `date_added` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
@@ -4166,9 +4338,9 @@ DROP TABLE IF EXISTS `project_event_agenda_locale`;
 
 CREATE TABLE `project_event_agenda_locale` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min:3, Max: 50',
-  `description` varchar(255) NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min:3, Max: 50',
-  `presenter` varchar(255) NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min:3, Max: 50',
+  `name` varchar(255) NOT NULL DEFAULT '',
+  `description` varchar(255) NOT NULL DEFAULT '',
+  `presenter` varchar(255) NOT NULL DEFAULT '',
   `venue_name` varchar(255) NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:3, Max:50',
   `locale_id` int(11) unsigned NOT NULL,
   `project_event_agenda_id` int(11) unsigned NOT NULL COMMENT 'From Session',
@@ -4187,9 +4359,9 @@ DROP TABLE IF EXISTS `project_organization_contact`;
 
 CREATE TABLE `project_organization_contact` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `organization_user_id` int(11) unsigned NOT NULL COMMENT 'Required, DropDownList',
-  `is_main_contact` enum('Yes', 'No') NOT NULL DEFAULT 'Yes' COMMENT 'Required, DropDownList',
-  `project_id` int(11) unsigned NOT NULL COMMENT 'Required, DropDownList',
+  `organization_user_id` int(11) unsigned NOT NULL,
+  `is_main_contact` enum('Yes', 'No') NOT NULL DEFAULT 'Yes',
+  `project_id` int(11) unsigned NOT NULL,
   `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_user_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `date_added` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
@@ -4207,9 +4379,9 @@ DROP TABLE IF EXISTS `project_donor_contact`;
 
 CREATE TABLE `project_donor_contact` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `donor_id` int(11) unsigned NOT NULL COMMENT 'Required, DropDownList',
-  `is_main_contact` enum('Yes', 'No') NOT NULL DEFAULT 'Yes' COMMENT 'Required, DropDownList',
-  `project_id` int(11) unsigned NOT NULL COMMENT 'Required, DropDownList',
+  `donor_id` int(11) unsigned NOT NULL,
+  `is_main_contact` enum('Yes', 'No') NOT NULL DEFAULT 'Yes',
+  `project_id` int(11) unsigned NOT NULL,
   `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_user_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `date_added` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
@@ -4227,9 +4399,9 @@ DROP TABLE IF EXISTS `project_agent_contact`;
 
 CREATE TABLE `project_agent_contact` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `agent_id` int(11) unsigned NOT NULL COMMENT 'Required, DropDownList',
-  `is_main_contact` enum('Yes', 'No') NOT NULL DEFAULT 'Yes' COMMENT 'Required, DropDownList',
-  `project_id` int(11) unsigned NOT NULL COMMENT 'Required, DropDownList',
+  `agent_id` int(11) unsigned NOT NULL,
+  `is_main_contact` enum('Yes', 'No') NOT NULL DEFAULT 'Yes',
+  `project_id` int(11) unsigned NOT NULL,
   `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_user_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `date_added` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
@@ -4247,8 +4419,8 @@ DROP TABLE IF EXISTS `project_venue_contact`;
 
 CREATE TABLE `project_venue_contact` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `project_id` int(11) unsigned NOT NULL COMMENT 'Required, DropDownList',
-  `is_main_contact` enum('Yes', 'No') NOT NULL DEFAULT 'Yes' COMMENT 'Required, DropDownList',
+  `project_id` int(11) unsigned NOT NULL,
+  `is_main_contact` enum('Yes', 'No') NOT NULL DEFAULT 'Yes',
   `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_user_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `date_added` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
@@ -4266,14 +4438,14 @@ DROP TABLE IF EXISTS `project_venue_contact_locale`;
 
 CREATE TABLE `project_venue_contact_locale` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `first_name` varchar(255) NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min:3, Max: 50',
-  `second_name` varchar(255) NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min:3, Max: 50',
-  `third_name` varchar(255) NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min:3, Max: 50',
-  `last_name` varchar(255) NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min:3, Max: 50',
-  `mobile_number` varchar(17) NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min:12, Max: 14',
+  `first_name` varchar(255) NOT NULL DEFAULT '',
+  `second_name` varchar(255) NOT NULL DEFAULT '',
+  `third_name` varchar(255) NOT NULL DEFAULT '',
+  `last_name` varchar(255) NOT NULL DEFAULT '',
+  `mobile_number` varchar(17) NOT NULL DEFAULT '',
   `phone_number` varchar(17) NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:12, Max: 14',
-  `address` varchar(255) NOT NULL DEFAULT '' COMMENT 'Required, Textarea, Min:3, Max: 50',
-  `email` varchar(255) NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min:3, Max:254',
+  `address` varchar(255) NOT NULL DEFAULT '',
+  `email` varchar(255) NOT NULL DEFAULT '',
   `avatar` varchar(1024) NOT NULL DEFAULT '',
   `locale_id` int(11) unsigned NOT NULL,
   `project_id` int(11) unsigned NOT NULL COMMENT 'From Session',
@@ -4296,12 +4468,12 @@ CREATE TABLE `project_media_gallery` (
   `size` int(11) unsigned NOT NULL,
   `mime_type` varchar(32) NOT NULL,
   `path` varchar(1024) NOT NULL DEFAULT '',
-  `media_type_id` tinyint(3) unsigned DEFAULT '0' COMMENT 'Required: Text Field, Min:0, Max:255',
-  `media_filetype_id` tinyint(3) unsigned DEFAULT '0' COMMENT 'Required: Text Field, Min:0, Max:255',
+  `media_type_id` tinyint(3) unsigned DEFAULT '0',
+  `media_filetype_id` tinyint(3) unsigned DEFAULT '0',
   `published` enum('Yes', 'No') NOT NULL DEFAULT 'No',
-  `media_status_id` tinyint(3) unsigned DEFAULT '0' COMMENT 'Required: Text Field, Min:0, Max:255',
+  `media_status_id` tinyint(3) unsigned DEFAULT '0',
   `sequence` int(11) unsigned NOT NULL DEFAULT '0',
-  `project_id` int(11) unsigned NOT NULL COMMENT 'Required',
+  `project_id` int(11) unsigned NOT NULL,
   `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_user_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `date_added` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
@@ -4338,9 +4510,9 @@ CREATE TABLE `project_media_youtube_gallery` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `youtube_link` varchar(255) NOT NULL,
   `published` enum('Yes', 'No') NOT NULL DEFAULT 'No',
-  `media_status_id` tinyint(3) unsigned DEFAULT '0' COMMENT 'Required: Text Field, Min:0, Max:255',
+  `media_status_id` tinyint(3) unsigned DEFAULT '0',
   `sequence` int(11) unsigned NOT NULL DEFAULT '0',
-  `project_id` int(11) unsigned NOT NULL COMMENT 'Required',
+  `project_id` int(11) unsigned NOT NULL,
   `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_user_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `date_added` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
@@ -4375,10 +4547,10 @@ DROP TABLE IF EXISTS `project_masjed`;
 
 CREATE TABLE `project_masjed` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `project_masjed_id` int(11) unsigned NOT NULL COMMENT 'Required, DropDownList',
-  `project_masjed_construction_type_id` int(11) unsigned NOT NULL COMMENT 'Required, DropDownList',
-  `project_masjed_furniture_type_id` int(11) unsigned NOT NULL COMMENT 'Required, DropDownList',
-  `project_masjed_type_id` int(11) unsigned NOT NULL COMMENT 'Required, DropDownList',
+  `project_masjed_id` int(11) unsigned NOT NULL,
+  `project_masjed_construction_type_id` int(11) unsigned NOT NULL,
+  `project_masjed_furniture_type_id` int(11) unsigned NOT NULL,
+  `project_masjed_type_id` int(11) unsigned NOT NULL,
   `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_user_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `date_added` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
@@ -4398,9 +4570,9 @@ DROP TABLE IF EXISTS `project_masjed_details`;
 
 CREATE TABLE `project_masjed_details` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `project_masjed_id` int(11) unsigned NOT NULL COMMENT 'Required, DropDownList',
-  `project_masjed_type_details_id` int(11) unsigned NOT NULL COMMENT 'Required, DropDownList',
-  `project_masjed_type_details_value` varchar(512) NOT NULL COMMENT 'Required, DropDownList',
+  `project_masjed_id` int(11) unsigned NOT NULL,
+  `project_masjed_type_details_id` int(11) unsigned NOT NULL,
+  `project_masjed_type_details_value` varchar(512) NOT NULL,
   `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_user_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `date_added` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
@@ -4423,7 +4595,7 @@ DROP TABLE IF EXISTS `project_masjed_type`;
 
 CREATE TABLE `project_masjed_type` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `published` enum('Yes', 'No') COLLATE utf8_bin NOT NULL DEFAULT 'Yes' COMMENT 'Required, DropDownList',
+  `published` enum('Yes', 'No') COLLATE utf8_bin NOT NULL DEFAULT 'Yes',
   `country_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_user_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
@@ -4440,7 +4612,7 @@ DROP TABLE IF EXISTS `project_masjed_type_locale`;
 
 CREATE TABLE `project_masjed_type_locale` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min:3, Max: 50',
+  `name` varchar(255) NOT NULL DEFAULT '',
   `locale_id` int(11) unsigned NOT NULL,
   `project_masjed_type_id` int(11) unsigned NOT NULL COMMENT 'From Session',
   `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
@@ -4468,7 +4640,7 @@ DROP TABLE IF EXISTS `project_masjed_type_details`;
 
 CREATE TABLE `project_masjed_type_details` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `published` enum('Yes', 'No') COLLATE utf8_bin NOT NULL DEFAULT 'Yes' COMMENT 'Required, DropDownList',
+  `published` enum('Yes', 'No') COLLATE utf8_bin NOT NULL DEFAULT 'Yes',
   `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_user_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `date_added` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
@@ -4488,8 +4660,8 @@ DROP TABLE IF EXISTS `project_masjed_type_details_locale`;
 
 CREATE TABLE `project_masjed_type_details_locale` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min:3, Max: 50',
-  `default_value` varchar(255) NOT NULL DEFAULT '' COMMENT 'Required, Text Field, Min:3, Max: 50',
+  `name` varchar(255) NOT NULL DEFAULT '',
+  `default_value` varchar(255) NOT NULL DEFAULT '',
   `locale_id` int(11) unsigned NOT NULL,
   `project_id` int(11) unsigned NOT NULL COMMENT 'From Session',
   `project_masjed_type_details_id` int(11) unsigned NOT NULL COMMENT 'From Session',
@@ -4510,7 +4682,7 @@ DROP TABLE IF EXISTS `project_masjed_construction_type`;
 
 CREATE TABLE `project_masjed_construction_type` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `published` enum('Yes', 'No') COLLATE utf8_bin NOT NULL DEFAULT 'Yes' COMMENT 'Required, DropDownList',
+  `published` enum('Yes', 'No') COLLATE utf8_bin NOT NULL DEFAULT 'Yes',
   `country_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_user_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
@@ -4527,7 +4699,7 @@ DROP TABLE IF EXISTS `project_masjed_construction_type_locale`;
 
 CREATE TABLE `project_masjed_construction_type_locale` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) DEFAULT NULL COMMENT 'Required, Text Field, Min:3, Max:100',
+  `name` varchar(255) DEFAULT NULL,
   `description` mediumtext NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:0, Max: 2048',
   `locale_id` int(11) unsigned NOT NULL,
   `project_masjed_construction_type_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
@@ -4548,7 +4720,7 @@ DROP TABLE IF EXISTS `project_masjed_furniture_type`;
 
 CREATE TABLE `project_masjed_furniture_type` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `published` enum('Yes', 'No') COLLATE utf8_bin NOT NULL DEFAULT 'Yes' COMMENT 'Required, DropDownList',
+  `published` enum('Yes', 'No') COLLATE utf8_bin NOT NULL DEFAULT 'Yes',
   `country_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_user_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
@@ -4565,7 +4737,7 @@ DROP TABLE IF EXISTS `project_masjed_furniture_type_locale`;
 
 CREATE TABLE `project_masjed_furniture_type_locale` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) DEFAULT NULL COMMENT 'Required, Text Field, Min:3, Max:100',
+  `name` varchar(255) DEFAULT NULL,
   `description` mediumtext NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:0, Max: 2048',
   `locale_id` int(11) unsigned NOT NULL,
   `project_masjed_furniture_type_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
@@ -4600,7 +4772,7 @@ DROP TABLE IF EXISTS `payment_method`;
 
 CREATE TABLE `payment_method` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `published` enum('Yes', 'No') COLLATE utf8_bin NOT NULL DEFAULT 'Yes' COMMENT 'Required, DropDownList',
+  `published` enum('Yes', 'No') COLLATE utf8_bin NOT NULL DEFAULT 'Yes',
   `country_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_user_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
@@ -4669,11 +4841,11 @@ CREATE TABLE `payment` (
   `organization_branch_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `hash_id` varchar(255) NOT NULL COMMENT 'FROM Session',
   `currency` varchar(3) COLLATE utf8_bin NOT NULL DEFAULT 'USD',
-  `currency_exchange_rate_id` int(11) unsigned NOT NULL COMMENT 'Required, DropDownList',
+  `currency_exchange_rate_id` int(11) unsigned NOT NULL,
   `amount` float unsigned NOT NULL COMMENT 'Optional, Text Field, Min:0.1',
-  `status` enum('initatied', 'success', 'failed', 'uncertain') NOT NULL DEFAULT 'initatied' COMMENT 'Required, DropDownList',
-  `payment_method_id` int(11) unsigned NOT NULL COMMENT 'Required, DropDownList',
-  `country_id` int(11) unsigned NOT NULL COMMENT 'Required, DropDownList',
+  `status` enum('initatied', 'success', 'failed', 'uncertain') NOT NULL DEFAULT 'initatied',
+  `payment_method_id` int(11) unsigned NOT NULL,
+  `country_id` int(11) unsigned NOT NULL,
   `date_added` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
   `date_updated` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
   PRIMARY KEY (`id`)
@@ -4691,9 +4863,9 @@ CREATE TABLE `payment_offline_details` (
   `received_by` varchar(255) NOT NULL COMMENT 'FROM Session',
   `currency` varchar(3) COLLATE utf8_bin NOT NULL DEFAULT 'USD',
   `amount` float unsigned NOT NULL COMMENT 'Optional, Text Field, Min:0.1',
-  `collection_type` enum('Cash', 'Check', 'Machine') NOT NULL DEFAULT 'Cash' COMMENT 'Required, DropDownList',
+  `collection_type` enum('Cash', 'Check', 'Machine') NOT NULL DEFAULT 'Cash',
   `collection_currency` varchar(3) COLLATE utf8_bin NOT NULL DEFAULT 'USD',
-  `currency_exchange_rate_id` int(11) unsigned NOT NULL COMMENT 'Required, DropDownList',
+  `currency_exchange_rate_id` int(11) unsigned NOT NULL,
   `date_of_collection` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
   `date_added` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
   `date_updated` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
@@ -4712,9 +4884,9 @@ CREATE TABLE `payment_cash_details` (
   `received_by` varchar(255) NOT NULL COMMENT 'FROM Session',
   `currency` varchar(3) COLLATE utf8_bin NOT NULL DEFAULT 'USD',
   `amount` float unsigned NOT NULL COMMENT 'Optional, Text Field, Min:0.1',
-  `collection_type` enum('Cash', 'Check', 'Machine') NOT NULL DEFAULT 'Cash' COMMENT 'Required, DropDownList',
+  `collection_type` enum('Cash', 'Check', 'Machine') NOT NULL DEFAULT 'Cash',
   `collection_currency` varchar(3) COLLATE utf8_bin NOT NULL DEFAULT 'USD',
-  `currency_exchange_rate_id` int(11) unsigned NOT NULL COMMENT 'Required, DropDownList',
+  `currency_exchange_rate_id` int(11) unsigned NOT NULL,
   `date_of_collection` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
   `date_added` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
   `date_updated` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
@@ -4729,12 +4901,12 @@ DROP TABLE IF EXISTS `payment_processing_fees`;
 
 CREATE TABLE `payment_processing_fees` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `payment_method_id` int(11) unsigned NOT NULL COMMENT 'Required, DropDownList',
-  `country_id` int(11) unsigned NOT NULL COMMENT 'Required, DropDownList',
-  `organization_id` int(11) unsigned NOT NULL COMMENT 'Required, DropDownList',
+  `payment_method_id` int(11) unsigned NOT NULL,
+  `country_id` int(11) unsigned NOT NULL,
+  `organization_id` int(11) unsigned NOT NULL,
   `fees` float unsigned NOT NULL COMMENT 'Optional, Text Field, Min:0.1',
   `currency` varchar(3) COLLATE utf8_bin NOT NULL DEFAULT 'USD',
-  `status` enum('Active', 'Inactive') NOT NULL DEFAULT 'Active' COMMENT 'Required, DropDownList',
+  `status` enum('Active', 'Inactive') NOT NULL DEFAULT 'Active',
   `owner_organization_user_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `date_added` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
@@ -4780,7 +4952,7 @@ DROP TABLE IF EXISTS `gl_account_type_locale`;
 
 CREATE TABLE `gl_account_type_locale` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) DEFAULT NULL COMMENT 'Required, Text Field, Min:3, Max:100',
+  `name` varchar(255) DEFAULT NULL,
   `description` mediumtext NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:0, Max: 2048',
   `locale_id` int(11) unsigned NOT NULL,
   `gl_account_type_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
@@ -4812,8 +4984,7 @@ CREATE TABLE `gl_account` (
   `date_added` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
   `date_updated` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
   PRIMARY KEY (`id`),
-  KEY `gl_account_type_id` (`gl_account_type_id`),
-  CONSTRAINT `gl_account_ibfk_1` FOREIGN KEY (`gl_account_type_id`) REFERENCES `gl_account_type` (`gl_account_type_id`) ON DELETE CASCADE ON UPDATE CASCADE
+  KEY `gl_account_type_id` (`gl_account_type_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
@@ -4824,7 +4995,7 @@ DROP TABLE IF EXISTS `gl_account_locale`;
 
 CREATE TABLE `gl_account_locale` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) DEFAULT NULL COMMENT 'Required, Text Field, Min:3, Max:100',
+  `name` varchar(255) DEFAULT NULL,
   `description` mediumtext NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:0, Max: 2048',
   `locale_id` int(11) unsigned NOT NULL,
   `gl_account_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
@@ -4861,8 +5032,7 @@ CREATE TABLE `transaction` (
   `insertion_date` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `transaction_type_id` int(11) unsigned DEFAULT NULL,
   PRIMARY KEY (`id`),
-  KEY `transaction_type_id` (`transaction_type_id`),
-  CONSTRAINT `transaction_ibfk_1` FOREIGN KEY (`transaction_type_id`) REFERENCES `transaction_type` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+  KEY `transaction_type_id` (`transaction_type_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
@@ -4882,9 +5052,7 @@ CREATE TABLE `transaction_entries` (
   `gl_account_id` bigint(20) unsigned DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `gl_account_id` (`gl_account_id`),
-  KEY `transaction_id` (`transaction_id`),
-  CONSTRAINT `transaction_entries_ibfk_1` FOREIGN KEY (`gl_account_id`) REFERENCES `gl_account` (`gl_account_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `transaction_entries_ibfk_2` FOREIGN KEY (`transaction_id`) REFERENCES `transaction` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+  KEY `transaction_id` (`transaction_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
