@@ -740,6 +740,7 @@ DROP TABLE IF EXISTS `message_template`;
 CREATE TABLE `message_template` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `message_type_id` int(11) unsigned NOT NULL,
+  `message_type` enum('Organization', 'Donor', 'Beneficiary') NOT NULL COMMENT 'From session',
   `from_mobile_number` varchar(255) NOT NULL DEFAULT '',
   `from_email` varchar(255) NOT NULL DEFAULT '',
   `to_mobile_number` varchar(255) NOT NULL DEFAULT '',
@@ -1382,8 +1383,9 @@ CREATE TABLE `beneficiary_profile` (
   `volunteer` enum('Yes', 'No') NOT NULL DEFAULT 'No' COMMENT 'Optional, DropDownList',
   `gallery` enum('Yes', 'No') NOT NULL DEFAULT 'No' COMMENT 'Optional, DropDownList',
   `research_notes` enum('Yes', 'No') NOT NULL DEFAULT 'No' COMMENT 'Optional, DropDownList',
-  `beneficiary_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
+  `published` enum('Yes', 'No') NOT NULL DEFAULT 'No' COMMENT 'Optional, DropDownList',
   `country_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
+  `beneficiary_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_user_id` int(11) unsigned NOT NULL,
   `date_added` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
@@ -2565,6 +2567,98 @@ CREATE TABLE `beneficiary_media_youtube_gallery_locale` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
+# Dump of table beneficiary_message_email
+# ------------------------------------------------------------
+
+DROP TABLE IF EXISTS `beneficiary_message_email`;
+
+CREATE TABLE `beneficiary_message_email` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `message_type_id` int(11) unsigned NOT NULL,
+  `from_name` varchar(255) NOT NULL DEFAULT '',
+  `from_email` varchar(255) NOT NULL DEFAULT '',
+  `to_name` varchar(255) NOT NULL DEFAULT '',
+  `to_email` varchar(255) NOT NULL DEFAULT '',
+  `subject` varchar(255) NOT NULL DEFAULT '',
+  `content` mediumtext NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:0, Max: 2048',
+  `locale_id` int(11) unsigned NOT NULL,
+  `message_template_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
+  `beneficiary_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
+  `organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
+  `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
+  `owner_organization_user_id` int(11) unsigned NOT NULL,
+  `date_added` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
+  `date_sent` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
+  `date_read` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
+  `date_updated` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+# Dump of table beneficiary_message_sms
+# ------------------------------------------------------------
+
+DROP TABLE IF EXISTS `beneficiary_message_sms`;
+
+CREATE TABLE `beneficiary_message_sms` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `message_type_id` int(11) unsigned NOT NULL,
+  `from_name` varchar(255) NOT NULL DEFAULT '',
+  `from_mobile_number` varchar(255) NOT NULL DEFAULT '',
+  `to_name` varchar(255) NOT NULL DEFAULT '',
+  `to_mobile_number` varchar(255) NOT NULL DEFAULT '',
+  `subject` varchar(255) NOT NULL DEFAULT '',
+  `content` mediumtext NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:0, Max: 2048',
+  `locale_id` int(11) unsigned NOT NULL,
+  `message_template_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
+  `beneficiary_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
+  `organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
+  `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
+  `owner_organization_user_id` int(11) unsigned NOT NULL,
+  `date_added` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
+  `date_sent` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
+  `date_read` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
+  `date_updated` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+# Dump of table beneficiary_group
+# ------------------------------------------------------------
+
+DROP TABLE IF EXISTS `beneficiary_group`;
+
+CREATE TABLE `beneficiary_group` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL DEFAULT '',
+  `description` mediumtext NOT NULL DEFAULT '' COMMENT 'Optional, Text Field, Min:0, Max: 2048',
+  `organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
+  `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
+  `owner_organization_user_id` int(11) unsigned NOT NULL,
+  `date_added` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
+  `date_updated` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+# Dump of table beneficiary_group_member
+# ------------------------------------------------------------
+
+DROP TABLE IF EXISTS `beneficiary_group_member`;
+
+CREATE TABLE `beneficiary_group_member` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `beneficiary_group_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
+  `beneficiary_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
+  `organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
+  `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
+  `owner_organization_user_id` int(11) unsigned NOT NULL,
+  `date_added` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
+  `date_updated` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
 # ////////////////////////////////////////////////////////////
 # 
 # Organization Tables
@@ -3619,12 +3713,12 @@ CREATE TABLE `admin_authorization_rule` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Admin Rule Table';
 
 
-# Dump of table admin_authorization_relation
+# Dump of table admin_authorization_organization_relation
 # ------------------------------------------------------------
 
-DROP TABLE IF EXISTS `admin_authorization_relation`;
+DROP TABLE IF EXISTS `admin_authorization_organization_relation`;
 
-CREATE TABLE `admin_authorization_relation` (
+CREATE TABLE `admin_authorization_organization_relation` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `status` enum('Initatied', 'Established', 'Refused', 'Broken', 'Canceled') NOT NULL DEFAULT 'Initatied',
   `initiator_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
@@ -3636,19 +3730,19 @@ CREATE TABLE `admin_authorization_relation` (
   `date_added` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
   `date_updated` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
   PRIMARY KEY (`id`),
-  KEY `admin_authorization_relation_owner_organization_id` (`owner_organization_id`),
-  KEY `admin_authorization_relation_owner_organization_user_id` (`owner_organization_user_id`),
-  CONSTRAINT `admin_authorization_relation_ibfk_2` FOREIGN KEY (`owner_organization_id`) REFERENCES `organization` (`id`),
-  CONSTRAINT `admin_authorization_relation_ibfk_3` FOREIGN KEY (`owner_organization_user_id`) REFERENCES `organization_user` (`id`)
+  KEY `admin_auth_org_relation_owner_organization_id` (`owner_organization_id`),
+  KEY `admin_auth_org_relation_owner_organization_user_id` (`owner_organization_user_id`),
+  CONSTRAINT `admin_auth_org_relation_ibfk_2` FOREIGN KEY (`owner_organization_id`) REFERENCES `organization` (`id`),
+  CONSTRAINT `admin_auth_org_relation_ibfk_3` FOREIGN KEY (`owner_organization_user_id`) REFERENCES `organization_user` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
-# Dump of table admin_authorization_relation_role
+# Dump of table admin_authorization_organization_relation_role
 # ------------------------------------------------------------
 
-DROP TABLE IF EXISTS `admin_authorization_relation_role`;
+DROP TABLE IF EXISTS `admin_authorization_organization_relation_role`;
 
-CREATE TABLE `admin_authorization_relation_role` (
+CREATE TABLE `admin_authorization_organization_relation_role` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `status` enum('Initatied', 'Established', 'Refused', 'Broken', 'Canceled') NOT NULL DEFAULT 'Initatied',
   `admin_authorization_role_id` int(10) unsigned NOT NULL DEFAULT '0' COMMENT 'Role ID',
@@ -3659,10 +3753,10 @@ CREATE TABLE `admin_authorization_relation_role` (
   `date_added` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
   `date_updated` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
   PRIMARY KEY (`id`),
-  KEY `admin_authorization_relation_role_owner_organization_id` (`owner_organization_id`),
-  KEY `admin_authorization_relation_role_owner_organization_user_id` (`owner_organization_user_id`),
-  CONSTRAINT `admin_authorization_relation_role_ibfk_2` FOREIGN KEY (`owner_organization_id`) REFERENCES `organization` (`id`),
-  CONSTRAINT `admin_authorization_relation_role_ibfk_3` FOREIGN KEY (`owner_organization_user_id`) REFERENCES `organization_user` (`id`)
+  KEY `admin_auth_org_relation_role_owner_organization_id` (`owner_organization_id`),
+  KEY `admin_auth_org_relation_role_owner_organization_user_id` (`owner_organization_user_id`),
+  CONSTRAINT `admin_auth_org_relation_role_ibfk_2` FOREIGN KEY (`owner_organization_id`) REFERENCES `organization` (`id`),
+  CONSTRAINT `admin_auth_org_relation_role_ibfk_3` FOREIGN KEY (`owner_organization_user_id`) REFERENCES `organization_user` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
