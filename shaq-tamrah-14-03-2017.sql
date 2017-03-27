@@ -1290,9 +1290,10 @@ DROP TABLE IF EXISTS `beneficiary_movement`;
 
 CREATE TABLE `beneficiary_movement` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `status` enum('Initiated', 'Accepted', 'Refused', 'Canceled') NOT NULL DEFAULT 'Initiated',
   `beneficiary_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
-  `new_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
-  `old_status` varchar(255) NOT NULL DEFAULT '',
+  `target_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
+  `beneficiary_current_status` varchar(255) NOT NULL DEFAULT '',
   `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_user_id` int(11) unsigned NOT NULL,
   `date_added` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
@@ -3720,7 +3721,7 @@ DROP TABLE IF EXISTS `admin_authorization_organization_relation`;
 
 CREATE TABLE `admin_authorization_organization_relation` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `status` enum('Initatied', 'Established', 'Refused', 'Broken', 'Canceled') NOT NULL DEFAULT 'Initatied',
+  `status` enum('Initiated', 'Established', 'Refused', 'Broken', 'Canceled') NOT NULL DEFAULT 'Initiated',
   `initiator_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `initiator_organization_user_id` int(11) unsigned NOT NULL,
   `target_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
@@ -3744,7 +3745,7 @@ DROP TABLE IF EXISTS `admin_authorization_organization_relation_role`;
 
 CREATE TABLE `admin_authorization_organization_relation_role` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `status` enum('Initatied', 'Established', 'Refused', 'Broken', 'Canceled') NOT NULL DEFAULT 'Initatied',
+  `status` enum('Initiated', 'Established', 'Refused', 'Broken', 'Canceled') NOT NULL DEFAULT 'Initiated',
   `admin_authorization_role_id` int(10) unsigned NOT NULL DEFAULT '0' COMMENT 'Role ID',
   `admin_authorization_organization_relation_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
@@ -4937,7 +4938,7 @@ CREATE TABLE `payment` (
   `currency` varchar(3) COLLATE utf8_bin NOT NULL DEFAULT 'USD',
   `currency_exchange_rate_id` int(11) unsigned NOT NULL,
   `amount` float unsigned NOT NULL COMMENT 'Optional, Text Field, Min:0.1',
-  `status` enum('initatied', 'success', 'failed', 'uncertain') NOT NULL DEFAULT 'initatied',
+  `status` enum('Initiated', 'success', 'failed', 'uncertain') NOT NULL DEFAULT 'Initiated',
   `payment_method_id` int(11) unsigned NOT NULL,
   `country_id` int(11) unsigned NOT NULL,
   `date_added` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
