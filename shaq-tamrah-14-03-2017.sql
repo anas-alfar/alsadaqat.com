@@ -1,5 +1,9 @@
 # ************************************************************
 # 
+# == Today ==
+# - Buy smart admin template
+# - Send repository to Bapita tooday
+# 
 # == DOMAINS ==
 # - check baytelmal i 9/3
 # - almasakeen.com
@@ -66,6 +70,7 @@
 #   or as part of the PPF? Check with Iskandar.
 # - Check with Ramamaneh if we need to add "Collected" status to the payment method!
 #   How would I know that a payment has been collected? check the COD for example!
+# - Check with Ramamneh, do we need to approve any type of payments? 
 # - Add gl_account_activities
 #   - List all activities
 #   - List each activity actinos
@@ -561,8 +566,8 @@ CREATE TABLE `media_filetype_locale` (
 # Dump of table media_status
 # - Draft
 # - Pending
-# - Active
-# - Blocked
+# - Approved
+# - Rejected
 # - Deleted
 # ------------------------------------------------------------
 
@@ -1524,7 +1529,6 @@ CREATE TABLE `beneficiary_profile_family_sponsorship` (
   `frequency` enum('One Time', 'Daily', 'Weekly', 'Monthly', 'Quarterly', 'Annual') DEFAULT 'One Time',
   `amount` float unsigned NOT NULL COMMENT 'Optional, Text Field, Min:0.1',
   `currency` varchar(3) COLLATE utf8_bin NOT NULL DEFAULT 'USD',
-  `currency_exchange_rate_id` int(11) unsigned NOT NULL,
   `status` enum('Active', 'Inactive') DEFAULT 'Active',
   `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_user_id` int(11) unsigned NOT NULL,
@@ -1839,6 +1843,7 @@ CREATE TABLE `beneficiary_profile_asset_received` (
   `receipt_number` varchar(50) DEFAULT NULL,
   `status` enum('Pending', 'Out For Delivery', 'Received') DEFAULT 'Pending',
   `donor_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
+  `payment_id` int(11) unsigned NOT NULL DEFAULT '0',
   `beneficiary_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `owner_organization_user_id` int(11) unsigned NOT NULL,
@@ -2436,7 +2441,7 @@ DROP TABLE IF EXISTS `beneficiary_profile_research_notes`;
 CREATE TABLE `beneficiary_profile_research_notes` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `support_type` enum('Frequent', 'Emergency', 'Medical', 'Educational', 'Other') NOT NULL DEFAULT 'Frequent',
-  `support_period` enum('Permanent', 'Once', 'Until healing', 'Until graduate') NOT NULL DEFAULT 'Permanent',
+  `support_frequency` enum('Permanent', 'Once', 'Until healing', 'Until graduate') NOT NULL DEFAULT 'Permanent',
   `expected_support_period` enum('Permanent', 'Once', 'Until healing', 'Until graduate') NOT NULL DEFAULT 'Permanent',
   `support_modality` enum('Money', 'In-kind', 'Money and in-kind', 'Volunteer', 'By hand', 'Educate a family member', 'Employ a family member', 'Other') NOT NULL DEFAULT 'Money',
   `information_source` enum('Official documents', 'Work visit', 'Home visit', 'Trusted neighbors') NOT NULL DEFAULT 'Official documents',
@@ -3155,6 +3160,7 @@ CREATE TABLE `organization_asset_received` (
   `asset_value` float unsigned NOT NULL COMMENT 'Optional, Text Field, Min:0.1',
   `receipt_number` varchar(50) DEFAULT NULL,
   `donor_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
+  `payment_id` int(11) unsigned NOT NULL DEFAULT '0',
   `organization_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `organization_user_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
   `organization_branch_id` int(11) unsigned NOT NULL COMMENT 'FROM Session',
@@ -4938,7 +4944,7 @@ CREATE TABLE `payment` (
   `currency` varchar(3) COLLATE utf8_bin NOT NULL DEFAULT 'USD',
   `currency_exchange_rate_id` int(11) unsigned NOT NULL,
   `amount` float unsigned NOT NULL COMMENT 'Optional, Text Field, Min:0.1',
-  `status` enum('Initiated', 'success', 'failed', 'uncertain') NOT NULL DEFAULT 'Initiated',
+  `status` enum('Initiated', 'success', 'failed', 'uncertain', 'Canceled') NOT NULL DEFAULT 'Initiated',
   `payment_method_id` int(11) unsigned NOT NULL,
   `country_id` int(11) unsigned NOT NULL,
   `date_added` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
@@ -4958,7 +4964,7 @@ CREATE TABLE `payment_offline_details` (
   `received_by` varchar(255) NOT NULL COMMENT 'FROM Session',
   `currency` varchar(3) COLLATE utf8_bin NOT NULL DEFAULT 'USD',
   `amount` float unsigned NOT NULL COMMENT 'Optional, Text Field, Min:0.1',
-  `collection_type` enum('Cash', 'Check', 'Machine') NOT NULL DEFAULT 'Cash',
+  `collection_type` enum('Cash', 'Check', 'Machine', 'Wire Transfer') NOT NULL DEFAULT 'Cash',
   `collection_currency` varchar(3) COLLATE utf8_bin NOT NULL DEFAULT 'USD',
   `currency_exchange_rate_id` int(11) unsigned NOT NULL,
   `date_of_collection` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
@@ -4979,7 +4985,7 @@ CREATE TABLE `payment_cash_details` (
   `received_by` varchar(255) NOT NULL COMMENT 'FROM Session',
   `currency` varchar(3) COLLATE utf8_bin NOT NULL DEFAULT 'USD',
   `amount` float unsigned NOT NULL COMMENT 'Optional, Text Field, Min:0.1',
-  `collection_type` enum('Cash', 'Check', 'Machine') NOT NULL DEFAULT 'Cash',
+  `collection_type` enum('Cash', 'Check', 'Machine', 'Wire Transfer') NOT NULL DEFAULT 'Cash',
   `collection_currency` varchar(3) COLLATE utf8_bin NOT NULL DEFAULT 'USD',
   `currency_exchange_rate_id` int(11) unsigned NOT NULL,
   `date_of_collection` datetime DEFAULT NULL COMMENT 'To be filled dynamically, Only shows in views',
