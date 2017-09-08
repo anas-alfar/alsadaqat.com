@@ -1663,7 +1663,7 @@ DROP TABLE IF EXISTS `beneficiary_profile_income`;
 
 CREATE TABLE `beneficiary_profile_income` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `beneficiary_profile_income_type_id` float unsigned NOT NULL COMMENT 'Optional, Text Field, Min:1',
+  `beneficiary_profile_income_type_id` int(11) unsigned NOT NULL COMMENT 'Optional, Text Field, Min:1',
   `amount` float unsigned NOT NULL COMMENT 'Optional, Text Field, Min:1',
   `currency` varchar(3) COLLATE utf8_bin NOT NULL DEFAULT 'USD',
   `currency_exchange_rate_id` int(11) unsigned NOT NULL,
